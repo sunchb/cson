@@ -14,6 +14,8 @@
  * to use, or define other parser which conforms to this interface.
  * */
 
+#include "stddef.h"
+
 /**
  * @brief the type of json object.
  */

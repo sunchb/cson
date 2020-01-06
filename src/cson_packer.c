@@ -144,11 +144,12 @@ int getJsonArray(void* input, const reflect_item_t* tbl, int index, cson_t* obj)
     size_t successCount = 0;
 
     for (int i = 0; i < size; i++) {
-        cson_t jotmp = cson_object();
+        cson_t jotmp;
         
         if(tbl[index].reflect_tbl[0].field[0] == '0'){      /* field start with '0' mean basic types. */
             ret = jsonPackTbl[tbl[index].reflect_tbl[0].type](pSrc + (i * tbl[index].arraySize), tbl[index].reflect_tbl, 0, &jotmp);
-        }else{
+        }else{        
+            jotmp = cson_object();    
             ret = csonStruct2JsonObj(jotmp, pSrc + (i * tbl[index].arraySize), tbl[index].reflect_tbl);
         }
 
@@ -156,6 +157,7 @@ int getJsonArray(void* input, const reflect_item_t* tbl, int index, cson_t* obj)
             successCount++;
             cson_array_add(joArray, jotmp);
         } else {
+            printf("create array item faild.\n");
             cson_decref(jotmp);
         }
     }
