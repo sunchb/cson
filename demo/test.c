@@ -166,8 +166,8 @@ reflect_item_t play_list_ref_tbl[] = {
     _property_end()
 };
 
-void printPlayList(PlayList* list);
-void freePlayList(PlayList* list);
+static void printPlayList(PlayList* list);
+static void freePlayList(PlayList* list);
 
 const static char* jStr = "{\"name\":\"jay zhou\",\"creater\":\"dahuaxia\",\"songList\":[{\"songName\":\"qilixiang\",\"signerName\":\"jay zhou\",\"albumName\":\"qilixiang\",\"url\":\"www.kugou.com\",\"duration\":20093999939292928292234.1,\"paid\":false,\"price\":6.66,\"lyric\":[{\"time\":1,\"text\":\"Sparrow outside the window\"},{\"time\":10,\"text\":\"Multi mouth on the pole\"}],\"key\":[1111,2222,3333]},{\"songName\":\"dongfengpo\",\"signerName\":\"jay zhou\",\"albumName\":\"dongfengpo\",\"url\":\"music.qq.com\",\"duration\":180.9,\"paid\":true,\"price\":0.88,\"lyric\":[{\"time\":10,\"text\":\"A sad parting, standing alone in the window\"},{\"time\":20,\"text\":\"I'm behind the door pretending you're not gone\"}],\"key\":[1234,5678,9876],\"strList\":[\"abcd\",\"efgh\",\"ijkl\"]}],\"extData\":{\"a\":999,\"b\":1}}";
 
@@ -194,7 +194,7 @@ void test1()
     freePlayList(&playList);
 }
 
-void* printProperty(void* pData, const reflect_item_t* tbl)
+static void* printProperty(void* pData, const reflect_item_t* tbl)
 {
     if (tbl->type == CSON_ARRAY || tbl->type == CSON_OBJECT) return NULL;
 
@@ -207,7 +207,7 @@ void* printProperty(void* pData, const reflect_item_t* tbl)
     return NULL;
 }
 
-void* freePointer(void* pData, const reflect_item_t* tbl)
+static void* freePointer(void* pData, const reflect_item_t* tbl)
 {
     if (tbl->type == CSON_ARRAY || tbl->type == CSON_STRING) {
         printf("free field %s.\n", tbl->field);
@@ -216,13 +216,13 @@ void* freePointer(void* pData, const reflect_item_t* tbl)
     return NULL;
 }
 
-void printPlayList(PlayList* list)
+static void printPlayList(PlayList* list)
 {
     /* 调用loopProperty迭代结构体中的属性,完成迭代输出属性值 */
     csonLoopProperty(list, play_list_ref_tbl, printProperty);
 }
 
-void freePlayList(PlayList* list)
+static void freePlayList(PlayList* list)
 {
     /* 调用loopProperty迭代结构体中的属性,释放字符串和数组申请的内存空间 */
     csonLoopProperty(list, play_list_ref_tbl, freePointer);
