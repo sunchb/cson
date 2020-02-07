@@ -12,13 +12,13 @@ typedef struct {
 	char*		icon;
 	int			id;
 	char*		name;
-    int         childrenNum;
+    size_t      childrenNum;
     ClassInfoChild*     children;
 }ClassInfo;
 
 typedef struct {
 	long long	timestamp;
-	int			infoNum;
+	size_t		infoNum;
 	ClassInfo*	info;
 }Data;
 
