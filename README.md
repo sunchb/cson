@@ -199,4 +199,5 @@ csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);
 
 ## restrict
 - Multidimensional arrays are not supported.
-- Cjson is used by default. If you want to use jannson or other json lib, please modify $(JSON_LIB) in makefile
+- Use size_t to save array size in structure, other types(int, short, char) are not supported now.
+- Cjson is used by default. If you want to use jannson or other json lib, please modify $(JSON_LIB) in makefile.
