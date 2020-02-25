@@ -5,36 +5,36 @@
 typedef struct {
     char*       name;
     char*       jump_url;
-}ClassInfoChild;
+} ClassInfoChild;
 
 typedef struct {
-	int			has_child;
-	char*		icon;
-	int			id;
-	char*		name;
-    size_t      childrenNum;
+    int         has_child;
+    char*       icon;
+    int         id;
+    char*       name;
+    char        childrenNum;
     ClassInfoChild*     children;
-}ClassInfo;
+} ClassInfo;
 
 typedef struct {
-	long long	timestamp;
-	size_t		infoNum;
-	ClassInfo*	info;
-}Data;
+    long long   timestamp;
+    size_t      infoNum;
+    ClassInfo*  info;
+} Data;
 
 typedef struct {
-	int			status;
-	Data		data;
-	int			errcode;
-}Response;
+    int         status;
+    Data        data;
+    int         errcode;
+} Response;
 
-reflect_item_t	ClassInfoChildTbl[] = {
+reflect_item_t  ClassInfoChildTbl[] = {
     _property_string(ClassInfoChild, name),
     _property_string(ClassInfoChild, jump_url),
     _property_end()
 };
 
-reflect_item_t	ClassInfoTbl[] = {
+reflect_item_t  ClassInfoTbl[] = {
     _property_int(ClassInfo, has_child),
     _property_string(ClassInfo, icon),
     _property_int(ClassInfo, id),
@@ -44,16 +44,16 @@ reflect_item_t	ClassInfoTbl[] = {
     _property_end()
 };
 
-reflect_item_t	DataTbl[] = {
+reflect_item_t  DataTbl[] = {
     _property_int(Data, timestamp),
     _property_int(Data, infoNum),
     _property_array_object(Data, info, ClassInfoTbl, ClassInfo, infoNum),
     _property_end()
 };
 
-reflect_item_t	ResponseTbl[] = {
+reflect_item_t  ResponseTbl[] = {
     _property_int(Response, status),
-	_property_obj(Response, data, DataTbl),
+    _property_obj(Response, data, DataTbl),
     _property_int(Response, errcode),
     _property_end()
 };
@@ -97,9 +97,9 @@ static void freePlayList(Response* list)
     csonLoopProperty(list, ResponseTbl, freePointer);
 }
 
-
-void test2(){
-	printf("=========================================\n");
+void test2()
+{
+    printf("=========================================\n");
     printf("\t\tRunning %s\n", __FUNCTION__);
     printf("=========================================\n");
     Response resp;

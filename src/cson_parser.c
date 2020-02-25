@@ -3,6 +3,7 @@
  * @author sun_chb@126.com
  */
 #include "cson.h"
+#include "cson_util.h"
 #include "string.h"
 #include "limits.h"
 #include "stdio.h"
@@ -117,60 +118,17 @@ int parseJsonString(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int 
 
 int parseJsonInteger(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int index)
 {
-    union{
-        char c;
-        short s;
-        int i;
-        long long l;
-    }ret;
+    int ret;
+    integer_val_t value;
+    ret = getIntegerValue(jo_tmp, tbl[index].size, &value);
 
-    long long temp;
-    if(cson_typeof(jo_tmp) == CSON_INTEGER){
-        temp = cson_integer_value(jo_tmp);
+    if(ret != ERR_NONE){
+        printf("Get integer failed!field:%s,errno:%d.\n", tbl[index].field, ret);
     }else{
-        double tempDouble = cson_real_value(jo_tmp);
-        if(tempDouble > LLONG_MAX || tempDouble < LLONG_MIN){
-            printf("value of field %s overflow.size=%ld,value=%f.\n", tbl[index].field, tbl[index].size, tempDouble);
-            return ERR_OVERFLOW;
-        }else{
-            temp = tempDouble;
-        }
+        csonSetPropertyFast(output, &value, tbl + index);
     }
 
-    if(tbl[index].size != sizeof(char) &&
-        tbl[index].size != sizeof(short) &&
-        tbl[index].size != sizeof(int) &&
-        tbl[index].size != sizeof(long long)){
-        printf("Unsupported size(=%ld) of integer.\n", tbl[index].size);
-        printf("Please check if the type of field %s in char/short/int/long long!\n", tbl[index].field);
-        return ERR_OVERFLOW;
-    }
-
-    if(tbl[index].size == sizeof(char) && (temp > CHAR_MAX || temp < CHAR_MIN)){
-        printf("value of field %s overflow.size=%ld,value=%lld.\n", tbl[index].field, tbl[index].size, temp);
-        return ERR_OVERFLOW;
-    }else if(tbl[index].size == sizeof(short) && (temp > SHRT_MAX || temp < SHRT_MIN)){
-        printf("value of field %s overflow.size=%ld,value=%lld.\n", tbl[index].field, tbl[index].size, temp);
-        return ERR_OVERFLOW;
-    }else if(tbl[index].size == sizeof(int)  && (temp > INT_MAX || temp < INT_MIN)){
-        printf("value of field %s overflow.size=%ld,value=%lld.\n", tbl[index].field, tbl[index].size, temp);
-        return ERR_OVERFLOW;
-    }else{
-    }
-
-    /* avoid error on big endian */
-    if(tbl[index].size == sizeof(char)){
-        ret.c = temp;
-    }else if(tbl[index].size == sizeof(short)){
-        ret.s = temp;
-    }else if(tbl[index].size == sizeof(int)){
-        ret.i = temp;
-    }else{
-        ret.l = temp;
-    }
-
-    csonSetPropertyFast(output, &ret, tbl + index);
-    return ERR_NONE;
+    return ret;
 }
 
 
@@ -181,18 +139,26 @@ int parseJsonObject(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int 
 
 int parseJsonArray(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int index)
 {
+    printf("parseJsonArray:%s\n", tbl[index].field);
     size_t arraySize = cson_array_size(jo_tmp);
 
     if (arraySize == 0) {
-        csonSetProperty(output, tbl->arrayCountField, &arraySize, tbl);
+        csonSetProperty(output, tbl[index].arrayCountField, &arraySize, tbl);
         return ERR_NONE;
+    }
+    
+    int countIndex = -1;
+    csonGetProperty(output, tbl[index].arrayCountField, tbl, &countIndex);
+
+    if(countIndex == -1){
+        return ERR_MISSING_FIELD;
     }
 
     char* pMem = (char*)malloc(arraySize * tbl[index].arraySize);
     if (pMem == NULL) return ERR_MEMORY;
 
-    size_t successCount = 0;
-    for (int j = 0; j < arraySize; j++) {
+    long long successCount = 0;
+    for (size_t j = 0; j < arraySize; j++) {
         cson_t item = cson_array_get(jo_tmp, j);
         if (item != NULL) {
             int ret;
@@ -209,14 +175,19 @@ int parseJsonArray(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int i
         }
     }
 
+    integer_val_t val;
+    if(checkIntegerValue(successCount, tbl[countIndex].size, &val) != ERR_NONE){
+        successCount = 0;
+    }        
+
     if (successCount == 0) {
-        csonSetProperty(output, tbl[index].arrayCountField, &successCount, tbl);
+        csonSetPropertyFast(output, &successCount, tbl + countIndex);
         free(pMem);
         pMem = NULL;
         csonSetPropertyFast(output, &pMem, tbl + index);
         return ERR_MISSING_FIELD;
     } else {
-        csonSetProperty(output, tbl[index].arrayCountField, &successCount, tbl);
+        csonSetPropertyFast(output, &val, tbl + countIndex);
         csonSetPropertyFast(output, &pMem, tbl + index);
         return ERR_NONE;
     }
@@ -243,35 +214,15 @@ int parseJsonReal(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int in
 
 int parseJsonBool(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int index)
 {
-    if(tbl[index].size != sizeof(char) &&
-        tbl[index].size != sizeof(short) &&
-        tbl[index].size != sizeof(int) &&
-        tbl[index].size != sizeof(long long)){
-        printf("Unsupported size(=%ld) of bool.\n", tbl[index].size);
-        printf("Please check if the type of field %s in char/short/int/long long!\n", tbl[index].field);
-        return ERR_OVERFLOW;
-    }
-
-    union{
-        char c;
-        short s;
-        int i;
-        long long l;
-    }temp;
-
-    /* avoid error on big endian */
-    if(tbl[index].size == sizeof(char)){
-        temp.c = cson_bool_value(jo_tmp);
-    }else if(tbl[index].size == sizeof(short)){
-        temp.s = cson_bool_value(jo_tmp);
-    }else if(tbl[index].size == sizeof(int)){
-        temp.i = cson_bool_value(jo_tmp);
+    int ret;
+    integer_val_t value;
+    ret = getIntegerValue(jo_tmp, tbl[index].size, &value);
+    if(ret != ERR_NONE){
+        printf("Get integer failed!field:%s,errno:%d.\n", tbl[index].field, ret);
     }else{
-        temp.l = cson_bool_value(jo_tmp);
+        csonSetPropertyFast(output, &value, tbl + index);
     }
-
-    csonSetPropertyFast(output, &temp, tbl + index);
-    return ERR_NONE;
+    return ret;
 }
 
 int parseJsonObjectDefault(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int index){

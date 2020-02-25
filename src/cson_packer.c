@@ -3,6 +3,7 @@
  * @author sun_chb@126.com
  */
 #include "cson.h"
+#include "cson_util.h"
 #include "stdio.h"
 #include "stdlib.h"
 
@@ -92,15 +93,9 @@ int getJsonInteger(void* input, const reflect_item_t* tbl, int index, cson_t* ob
     
     void* pSrc = (void*)((char*)input + tbl[index].offset);
 
-    if(tbl[index].size == sizeof(char)){
-        *obj = cson_integer(*((char*)pSrc));
-    }else if(tbl[index].size == sizeof(short)){
-        *obj = cson_integer(*((short*)pSrc));
-    }else if(tbl[index].size == sizeof(int)){
-        *obj = cson_integer(*((int*)pSrc));
-    }else{
-        *obj = cson_integer(*((long long*)pSrc));
-    }
+    long long val = getIntegerValueFromPointer(pSrc, tbl[index].size);
+
+    *obj = cson_integer(val);
 
     return ERR_NONE;
 }
@@ -133,17 +128,23 @@ int getJsonObject(void* input, const reflect_item_t* tbl, int index, cson_t* obj
 int getJsonArray(void* input, const reflect_item_t* tbl, int index, cson_t* obj)
 {
     int ret = ERR_NONE;
+    int countIndex = -1;
     char* pSrc = (*(char**)((char*)input + tbl[index].offset));
 
     if (pSrc == NULL) return ERR_MISSING_FIELD;
 
+    void* ptr = csonGetProperty(input, tbl[index].arrayCountField, tbl, &countIndex);
+    
+    if(ptr == NULL || countIndex == -1){
+        return ERR_MISSING_FIELD;
+    }
+    long long size = getIntegerValueFromPointer(ptr, tbl[countIndex].size);
+
     cson_t joArray = cson_array();
 
-    size_t size = *((size_t*)csonGetProperty(input, tbl[index].arrayCountField, tbl));
+    long long successCount = 0;
 
-    size_t successCount = 0;
-
-    for (int i = 0; i < size; i++) {
+    for (long long i = 0; i < size; i++) {
         cson_t jotmp;
         
         if(tbl[index].reflect_tbl[0].field[0] == '0'){      /* field start with '0' mean basic types. */
@@ -198,6 +199,8 @@ int getJsonBool(void* input, const reflect_item_t* tbl, int index, cson_t* obj)
     }
     
     void* pSrc = (void*)((char*)input + tbl[index].offset);
+
+    
 
     if(tbl[index].size == sizeof(char)){
         *obj = cson_bool(*((char*)pSrc));

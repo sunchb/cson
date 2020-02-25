@@ -119,10 +119,11 @@ extern const reflect_item_t realReflectTbl[];
  * @param obj: object to be operated.
  * @param field:
  * @param tbl: property table of the type.
+ * @param pIndex: return index of the field in tbl.
  *
  * @return address of field.
  */
-void*   csonGetProperty(void* obj, const char* field, const reflect_item_t* tbl);
+void*   csonGetProperty(void* obj, const char* field, const reflect_item_t* tbl, int* pIndex);
 
 /**
  * @brief set the field of object to specified data.

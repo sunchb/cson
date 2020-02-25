@@ -3,6 +3,7 @@
  * @author sun_chb@126.com
  */
 #include "cson_reflect.h"
+#include "cson_util.h"
 #include "string.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -27,7 +28,7 @@ const reflect_item_t boolReflectTbl[] = {
     {}
 };
 
-static const reflect_item_t* getReflexItem(const char* field, const reflect_item_t* tbl)
+static const reflect_item_t* getReflexItem(const char* field, const reflect_item_t* tbl, int* pIndex)
 {
     const reflect_item_t* ret = NULL;
 
@@ -35,6 +36,8 @@ static const reflect_item_t* getReflexItem(const char* field, const reflect_item
         if (!(tbl[i].field)) break;
         if (strcmp(field, tbl[i].field) == 0) {
             ret = &(tbl[i]);
+
+            if(pIndex) *pIndex = i;
             break;
         }
     }
@@ -44,10 +47,10 @@ static const reflect_item_t* getReflexItem(const char* field, const reflect_item
     return ret;
 }
 
-void*   csonGetProperty(void* obj, const char* field, const reflect_item_t* tbl)
+void*   csonGetProperty(void* obj, const char* field, const reflect_item_t* tbl, int* pIndex)
 {
     if (!(obj && field && tbl)) return NULL;
-    const reflect_item_t* ret = getReflexItem(field, tbl);
+    const reflect_item_t* ret = getReflexItem(field, tbl, pIndex);
 
     if (!ret) return NULL;
 
@@ -58,7 +61,7 @@ void    csonSetProperty(void* obj, const char* field, void* data, const reflect_
 {
     if (!(obj && field && data && tbl)) return;
 
-    const reflect_item_t* ret = getReflexItem(field, tbl);
+    const reflect_item_t* ret = getReflexItem(field, tbl, NULL);
 
     if (!ret) return;
 
@@ -84,7 +87,14 @@ void csonLoopProperty(void* pData, const reflect_item_t* tbl, loop_func_t func)
 
         char* pProperty = (char*)pData + tbl[i].offset;
         if (tbl[i].type == CSON_ARRAY) {
-            size_t size = *((size_t*)csonGetProperty(pData, tbl[i].arrayCountField, tbl));
+            int countIndex = -1;
+            void* ptr = csonGetProperty(pData, tbl[i].arrayCountField, tbl, &countIndex);
+            
+            if(ptr == NULL || countIndex == -1){
+                continue;
+            }
+            long long size = getIntegerValueFromPointer(ptr, tbl[countIndex].size);
+
             for (int j = 0; j < size; j++) {
                 csonLoopProperty(*((char**)pProperty) + j * tbl[i].arraySize, tbl[i].reflect_tbl, func);
             }
