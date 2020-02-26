@@ -119,7 +119,7 @@ extern const reflect_item_t realReflectTbl[];
  * @param obj: object to be operated.
  * @param field:
  * @param tbl: property table of the type.
- * @param pIndex: return index of the field in tbl.
+ * @param pIndex: return index of the field in tbl. @nullable
  *
  * @return address of field.
  */

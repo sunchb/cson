@@ -95,7 +95,7 @@ void csonLoopProperty(void* pData, const reflect_item_t* tbl, loop_func_t func)
             }
             long long size = getIntegerValueFromPointer(ptr, tbl[countIndex].size);
 
-            for (int j = 0; j < size; j++) {
+            for (long long j = 0; j < size; j++) {
                 csonLoopProperty(*((char**)pProperty) + j * tbl[i].arraySize, tbl[i].reflect_tbl, func);
             }
         } else if (tbl[i].type == CSON_OBJECT) {

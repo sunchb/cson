@@ -46,6 +46,16 @@ json_obj_proc jsonObjDefaultTbl[] = {
     NULL
 };
 
+
+typedef union {
+    char c;
+    short s;
+    int i;
+    long long l;
+}integer_val_t;
+static int getIntegerValue(cson_t jo_tmp, int size, integer_val_t* i);
+static int convertInteger(long long val, int size, integer_val_t* i);
+static int checkInteger(long long val, int size);
 static int csonJsonObj2Struct(cson_t jo, void* output, const reflect_item_t* tbl);
 
 int csonJsonStr2Struct(const char* jstr, void* output, const reflect_item_t* tbl)
@@ -131,7 +141,6 @@ int parseJsonInteger(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int
     return ret;
 }
 
-
 int parseJsonObject(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int index)
 {
     return csonJsonObj2Struct(jo_tmp, (char*)output + tbl[index].offset, tbl[index].reflect_tbl);
@@ -176,9 +185,9 @@ int parseJsonArray(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int i
     }
 
     integer_val_t val;
-    if(checkIntegerValue(successCount, tbl[countIndex].size, &val) != ERR_NONE){
+    if(convertInteger(successCount, tbl[countIndex].size, &val) != ERR_NONE){
         successCount = 0;
-    }        
+    }
 
     if (successCount == 0) {
         csonSetPropertyFast(output, &successCount, tbl + countIndex);
@@ -290,5 +299,68 @@ int parseJsonRealDefault(cson_t jo_tmp, void* output, const reflect_item_t* tbl,
 
     double temp = 0.0;
     csonSetPropertyFast(output, &temp, tbl + index);
+    return ERR_NONE;
+}
+
+
+int getIntegerValue(cson_t jo_tmp, int size, integer_val_t* i){
+    long long temp;
+    
+    if(cson_typeof(jo_tmp) == CSON_INTEGER){
+        temp = cson_integer_value(jo_tmp);
+    }else if(cson_typeof(jo_tmp) == CSON_TRUE){
+        temp = 1;
+    }else if(cson_typeof(jo_tmp) == CSON_FALSE){
+        temp = 0;
+    }else if(cson_typeof(jo_tmp) == CSON_REAL){
+        double tempDouble = cson_real_value(jo_tmp);
+        if(tempDouble > LLONG_MAX || tempDouble < LLONG_MIN){
+            return ERR_OVERFLOW;
+        }else{
+            temp = tempDouble;
+        }
+    }else{
+        return ERR_ARGS;
+    }
+
+    return convertInteger(temp, size, i);
+}
+
+int convertInteger(long long val, int size, integer_val_t* i){
+    int ret = checkInteger(val, size);
+
+    if(ret != ERR_NONE) return ret;
+    
+    /* avoid error on big endian */
+    if(size == sizeof(char)){
+        i->c = val;
+    }else if(size == sizeof(short)){
+        i->s = val;
+    }else if(size == sizeof(int)){
+        i->i = val;
+    }else{
+        i->l = val;
+    }
+
+    return ERR_NONE;
+}
+
+int checkInteger(long long val, int size){
+    if(size != sizeof(char) &&
+        size != sizeof(short) &&
+        size != sizeof(int) &&
+        size != sizeof(long long)){
+        return ERR_OVERFLOW;
+    }
+    
+    if(size == sizeof(char) && (val > CHAR_MAX || val < CHAR_MIN)){
+        return ERR_OVERFLOW;
+    }else if(size == sizeof(short) && (val > SHRT_MAX || val < SHRT_MIN)){
+        return ERR_OVERFLOW;
+    }else if(size == sizeof(int)  && (val > INT_MAX || val < INT_MIN)){
+        return ERR_OVERFLOW;
+    }else{
+    }
+
     return ERR_NONE;
 }
