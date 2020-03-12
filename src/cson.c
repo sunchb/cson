@@ -728,3 +728,37 @@ void csonLoopProperty(void* pData, const reflect_item_t* tbl, loop_func_t func)
         i++;
     }
 }
+
+static void* printPropertySub(void* pData, const reflect_item_t* tbl)
+{
+    if (tbl->type == CSON_ARRAY || tbl->type == CSON_OBJECT) return NULL;
+
+    if (tbl->type == CSON_INTEGER || tbl->type == CSON_TRUE || tbl->type == CSON_FALSE) printf("%s:%d\n", tbl->field, *(int*)pData);
+
+    if (tbl->type == CSON_REAL) printf("%s:%f\n", tbl->field, *(double*)pData);
+
+    if (tbl->type == CSON_STRING) printf("%s:%s\n", tbl->field, *((char**)pData));
+
+    return NULL;
+}
+
+static void* freePointerSub(void* pData, const reflect_item_t* tbl)
+{
+    if (tbl->type == CSON_ARRAY || tbl->type == CSON_STRING) {
+        printf("free field %s.\n", tbl->field);
+        free(*(void**)pData);
+    }
+    return NULL;
+}
+
+void csonPrintProperty(void* pData, const reflect_item_t* tbl)
+{
+    /* 调用loopProperty迭代结构体中的属性,完成迭代输出属性值 */
+    csonLoopProperty(pData, tbl, printPropertySub);
+}
+
+void csonFreePointer(void* list, const reflect_item_t* tbl)
+{
+    /* 调用loopProperty迭代结构体中的属性,释放字符串和数组申请的内存空间 */
+    csonLoopProperty(list, tbl, freePointerSub);
+}

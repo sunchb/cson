@@ -185,45 +185,11 @@ void test1()
     int ret = csonJsonStr2Struct(jStr, &playList, play_list_ref_tbl);
     /* test print */
     printf("ret=%d\n", ret);
-    printPlayList(&playList);
+    csonPrintProperty(&playList, play_list_ref_tbl);
 
     char* jstrOutput;
     ret = csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);
     printf("ret=%d\nJson:%s\n", ret, jstrOutput);
     free(jstrOutput);
-    freePlayList(&playList);
-}
-
-static void* printProperty(void* pData, const reflect_item_t* tbl)
-{
-    if (tbl->type == CSON_ARRAY || tbl->type == CSON_OBJECT) return NULL;
-
-    if (tbl->type == CSON_INTEGER || tbl->type == CSON_TRUE || tbl->type == CSON_FALSE) printf("%s:%d\n", tbl->field, *(int*)pData);
-
-    if (tbl->type == CSON_REAL) printf("%s:%f\n", tbl->field, *(double*)pData);
-
-    if (tbl->type == CSON_STRING) printf("%s:%s\n", tbl->field, *((char**)pData));
-
-    return NULL;
-}
-
-static void* freePointer(void* pData, const reflect_item_t* tbl)
-{
-    if (tbl->type == CSON_ARRAY || tbl->type == CSON_STRING) {
-        printf("free field %s.\n", tbl->field);
-        free(*(void**)pData);
-    }
-    return NULL;
-}
-
-static void printPlayList(PlayList* list)
-{
-    /* 调用loopProperty迭代结构体中的属性,完成迭代输出属性值 */
-    csonLoopProperty(list, play_list_ref_tbl, printProperty);
-}
-
-static void freePlayList(PlayList* list)
-{
-    /* 调用loopProperty迭代结构体中的属性,释放字符串和数组申请的内存空间 */
-    csonLoopProperty(list, play_list_ref_tbl, freePointer);
+    csonFreePointer(&playList, play_list_ref_tbl);
 }

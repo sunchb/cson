@@ -233,4 +233,24 @@ int csonJsonStr2Struct(const char* jstr, void* output, const reflect_item_t* tbl
  */
 int csonStruct2JsonStr(char** jstr, void* input, const reflect_item_t* tbl);
 
+/**
+ * @brief Iterative output properties of data
+ *
+ * @param pData: struct object
+ * @param tbl: property table of input.
+ *
+ * @return void.
+ */
+void csonPrintProperty(void* pData, const reflect_item_t* tbl);
+
+/**
+ * @brief Iterative free pointer of data
+ *
+ * @param pData: struct object
+ * @param tbl: property table of input.
+ *
+ * @return void.
+ */
+void csonFreePointer(void* list, const reflect_item_t* tbl);
+
 #endif
