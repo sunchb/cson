@@ -95,7 +95,7 @@ typedef struct reflect_item_t {
     size_t                  size;                   /**< size of property */
     cson_type               type;                   /**< corresponding json type */
     const struct reflect_item_t*  reflect_tbl;      /**< must be specified when type is object or array */
-    size_t                  arraySize;              /**< size of per array item. must be specified when type is array */
+    size_t                  arrayItemSize;              /**< size of per array item. must be specified when type is array */
     char*                   arrayCountField;        /**< field saving array size */
     int                     nullable;               /**< paser return failure when the field is not found and nullable equals to 0 */
 } reflect_item_t;

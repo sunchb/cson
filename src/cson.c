@@ -263,10 +263,10 @@ int getJsonArray(void* input, const reflect_item_t* tbl, int index, cson_t* obj)
         cson_t jotmp;
 
         if (tbl[index].reflect_tbl[0].field[0] == '0') {    /* field start with '0' mean basic types. */
-            ret = jsonPackTbl[tbl[index].reflect_tbl[0].type](pSrc + (i * tbl[index].arraySize), tbl[index].reflect_tbl, 0, &jotmp);
+            ret = jsonPackTbl[tbl[index].reflect_tbl[0].type](pSrc + (i * tbl[index].arrayItemSize), tbl[index].reflect_tbl, 0, &jotmp);
         } else {
             jotmp = cson_object();
-            ret = csonStruct2JsonObj(jotmp, pSrc + (i * tbl[index].arraySize), tbl[index].reflect_tbl);
+            ret = csonStruct2JsonObj(jotmp, pSrc + (i * tbl[index].arrayItemSize), tbl[index].reflect_tbl);
         }
 
         if (ret == ERR_NONE) {
@@ -432,7 +432,7 @@ int parseJsonArray(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int i
         return ERR_MISSING_FIELD;
     }
 
-    char* pMem = (char*)malloc(arraySize * tbl[index].arraySize);
+    char* pMem = (char*)malloc(arraySize * tbl[index].arrayItemSize);
     if (pMem == NULL) return ERR_MEMORY;
 
     long long successCount = 0;
@@ -442,9 +442,9 @@ int parseJsonArray(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int i
             int ret;
 
             if (tbl[index].reflect_tbl[0].field[0] == '0') {    /* field start with '0' mean basic types. */
-                ret = jsonObjProcTbl[tbl[index].reflect_tbl[0].type](item, pMem + (successCount * tbl[index].arraySize), tbl[index].reflect_tbl, 0);
+                ret = jsonObjProcTbl[tbl[index].reflect_tbl[0].type](item, pMem + (successCount * tbl[index].arrayItemSize), tbl[index].reflect_tbl, 0);
             } else {
-                ret = csonJsonObj2Struct(item, pMem + (successCount * tbl[index].arraySize), tbl[index].reflect_tbl);
+                ret = csonJsonObj2Struct(item, pMem + (successCount * tbl[index].arrayItemSize), tbl[index].reflect_tbl);
             }
 
             if (ret == ERR_NONE) {
@@ -717,7 +717,7 @@ void csonLoopProperty(void* pData, const reflect_item_t* tbl, loop_func_t func)
             long long size = getIntegerValueFromPointer(ptr, tbl[countIndex].size);
 
             for (long long j = 0; j < size; j++) {
-                csonLoopProperty(*((char**)pProperty) + j * tbl[i].arraySize, tbl[i].reflect_tbl, func);
+                csonLoopProperty(*((char**)pProperty) + j * tbl[i].arrayItemSize, tbl[i].reflect_tbl, func);
             }
         } else if (tbl[i].type == CSON_OBJECT) {
             csonLoopProperty(pProperty, tbl[i].reflect_tbl, func);
