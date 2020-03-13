@@ -1,3 +1,5 @@
+# 简体中文 | English(./README.md)
+
 # cson
 轻松完成C语言结构体和Json的转换。
 
@@ -84,7 +86,7 @@ https://github.com/DaveGamble/cJSON.git
 ```
 
 ### 1. 定义与Json协议对应的结构体。
-即使不适用json，通常我们也会这么做。
+即使不使用cson，通常我们也会这么做。
 
 #### 注意事项
 - 字符串必须定义为char*类型。

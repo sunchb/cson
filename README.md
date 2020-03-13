@@ -1,3 +1,5 @@
+# [简体中文](./README_zh.md) | English
+
 # cson
 Transformation between json string and struct.
 
