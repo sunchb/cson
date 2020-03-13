@@ -1,35 +1,33 @@
 # cson
-Transformation between json string and struct.
+轻松完成C语言结构体和Json的转换。
 
-The transformation between string to JSON objects (e.g. json_t in Jansson) 
-is implemented by a third-party library (Jansson or cJSON. Refer to Dependence).
-What cson really implements is the transformation between JSON object and structure.
+其中Json字符串与Json对象（例如Jansson库中的json_t）之间的转换由第三方库实现（例如Jansson或者cJSON，请参考依赖库）。
+cson真正实现的是Json对象与结构体间的转换。
 
-## Compilation 
-### Compile static library
+## 编译
+### 编译静态库
 ``` shell
 $ git clone https://github.com/sunchb/cson.git
 $ cd cson
 $ make
 ```
-### Compile demo
+### 编译示例
 ``` shell
 $ cd demo
 $ make
 $ ./test
 ```
-## How to use
-1. Define the data structure for JSON.
-2. Define the property description table for data structure.
-3. Call cson api to decode or encode.
+## 如何使用cson
+1. 定义与Json协议对应的结构体。
+2. 定义结构体的属性描述表。
+3. 调用cson接口完成转换。
 
-## Dependence
+## 依赖
 https://github.com/akheron/jansson.git
 https://github.com/DaveGamble/cJSON.git
 
-## Demo
-Here is a JSON with various data types. eg. Interger, String, Real, Boolean, Object, and Array.
-We're going to decode and encode it by cson.
+## 示例
+下面具有各种数据类型的JSON。例如整数，字符串，实数，布尔值，对象和数组。我们将通过cson对其进行解码和编码。
 
 ``` json
 {
@@ -85,13 +83,13 @@ We're going to decode and encode it by cson.
 }
 ```
 
-### 1. Define the data structure for JSON.
-Even if you don't use cson, you usually need to do like this.
+### 1. 定义与Json协议对应的结构体。
+即使不适用json，通常我们也会这么做。
 
-#### Attention
-- String must be declared as char*.
-- Array must be declared as pointer.
-- Declare additional properties to hold the array size for every array property.
+#### 注意事项
+- 字符串必须定义为char*类型。
+- 数组必须定义为指针类型。
+- 如果结构体包含数组，需要为每一个数组定义一个额外的属性，用于保存数组大小。
 
 ``` c
 typedef struct {
@@ -125,8 +123,8 @@ typedef struct {
 } PlayList;
 ```
 
-### 2. Define the property description table for data structure.
-Use following definitions to help you describe the structure.
+### 2. 定义结构体的属性描述表。
+使用以下宏定义描述结构体属性。
 - _property_int(type, field) 
 - _property_real(type, field)
 - _property_bool(type, field)
@@ -138,7 +136,7 @@ Use following definitions to help you describe the structure.
 - _property_array_real(type, field, arrayType, countfild)
 - _property_array_bool(type, field, arrayType, countfild)
 
-Args notes:
+参数说明：
 - type:         type of data structure
 - field:        property name
 - tbl:          description table of the property type. use when object or object array
@@ -185,7 +183,7 @@ reflect_item_t play_list_ref_tbl[] = {
 };
 ```
 
-### 3. Call cson api to decode or encode.
+### 3. 调用cson接口编解码Json。
 ``` c
 PlayList playList;
 
@@ -197,6 +195,6 @@ char* jstrOutput;
 csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);
 ```
 
-## Restrict
-- Multidimensional arrays are not supported.
-- Cjson is used by default. If you want to use jannson or other json lib, please modify $(JSON_LIB) in makefile.
+## 限制
+- 暂不支持多维数组。
+- 默认使用Cjson库。如果需要使用jannson，请修改Makefile中的$(JSON_LIB)变量。
