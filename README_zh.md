@@ -1,4 +1,4 @@
-# 简体中文 | English(./README.md)
+# 简体中文 | [English](./README.md)
 
 # cson
 轻松完成C语言结构体和Json的转换。
