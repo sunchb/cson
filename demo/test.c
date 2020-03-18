@@ -104,11 +104,9 @@ typedef struct {
     int         duration;
     int         paid;
     double      price;
-    size_t      lyricNum;
     Lyric*      lyric;
     size_t      keyNum;
     int*        key;
-    size_t      strNum;
     char**      strList;
 } SongInfo;
 
@@ -120,7 +118,6 @@ typedef struct {
 typedef struct {
     char*       name;
     char*       creater;
-    size_t      songNum;
     SongInfo*   songList;
     ExtData     extData;
 } PlayList;
@@ -142,12 +139,10 @@ reflect_item_t song_ref_tbl[] = {
     _property_int(SongInfo, duration),
     _property_bool(SongInfo, paid),
     _property_real(SongInfo, price),
-    _property_int(SongInfo, lyricNum),
-    _property_array_object(SongInfo, lyric, lyric_ref_tbl, Lyric, lyricNum),
+    _property_array_object(SongInfo, lyric, lyric_ref_tbl, Lyric),
     _property_int(SongInfo, keyNum),
-    _property_array_int(SongInfo, key, int, keyNum),
-    _property_int(SongInfo, strNum),
-    _property_array_string(SongInfo, strList, char*, strNum),
+    _property_array_int(SongInfo, key, int),
+    _property_array_string(SongInfo, strList, char*),
     _property_end()
 };
 
@@ -160,8 +155,7 @@ reflect_item_t ext_data_ref_tbl[] = {
 reflect_item_t play_list_ref_tbl[] = {
     _property_string(PlayList, name),
     _property_string(PlayList, creater),
-    _property_int(PlayList, songNum),
-    _property_array_object(PlayList, songList, song_ref_tbl, SongInfo, songNum),
+    _property_array_object(PlayList, songList, song_ref_tbl, SongInfo),
     _property_obj(PlayList, extData, ext_data_ref_tbl),
     _property_end()
 };
@@ -186,6 +180,8 @@ void test1()
     /* test print */
     printf("ret=%d\n", ret);
     csonPrintProperty(&playList, play_list_ref_tbl);
+
+    size_t s = csonGetArraySizeByField(&playList, "songList", play_list_ref_tbl);
 
     char* jstrOutput;
     ret = csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);

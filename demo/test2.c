@@ -12,13 +12,11 @@ typedef struct {
     char*       icon;
     int         id;
     char*       name;
-    char        childrenNum;
     ClassInfoChild*     children;
 } ClassInfo;
 
 typedef struct {
     long long   timestamp;
-    int      infoNum;
     ClassInfo*  info;
 } Data;
 
@@ -39,15 +37,13 @@ reflect_item_t  ClassInfoTbl[] = {
     _property_string(ClassInfo, icon),
     _property_int(ClassInfo, id),
     _property_string(ClassInfo, name),
-    _property_int(ClassInfo, childrenNum),
-    _property_array_object(ClassInfo, children, ClassInfoChildTbl, ClassInfoChild, childrenNum),
+    _property_array_object(ClassInfo, children, ClassInfoChildTbl, ClassInfoChild),
     _property_end()
 };
 
 reflect_item_t  DataTbl[] = {
     _property_int(Data, timestamp),
-    _property_int(Data, infoNum),
-    _property_array_object(Data, info, ClassInfoTbl, ClassInfo, infoNum),
+    _property_array_object(Data, info, ClassInfoTbl, ClassInfo),
     _property_end()
 };
 
