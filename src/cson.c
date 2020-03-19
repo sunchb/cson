@@ -248,7 +248,7 @@ int getJsonArray(void* input, const reflect_item_t* tbl, int index, cson_t* obj)
 
     if (pSrc == NULL) return ERR_MISSING_FIELD;
 
-    cson_array_size_t size = *((cson_array_size_t*)(pSrc - sizeof(cson_array_size_t)));
+    cson_array_size_t size = csonGetArraySize(pSrc);
 
     cson_t joArray = cson_array();
 
@@ -421,7 +421,7 @@ int parseJsonArray(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int i
         return ERR_NONE;
     }
 
-    char* pMem = (char*)malloc(arraySize * tbl[index].arrayItemSize + sizeof(cson_array_size_t));
+    char* pMem = (char*)csonAllocArray(arraySize * tbl[index].arrayItemSize);
     if (pMem == NULL) return ERR_MEMORY;
 
     cson_array_size_t successCount = 0;
@@ -431,9 +431,9 @@ int parseJsonArray(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int i
             int ret;
 
             if (tbl[index].reflect_tbl[0].field[0] == '0') {    /* field start with '0' mean basic types. */
-                ret = jsonObjProcTbl[tbl[index].reflect_tbl[0].type](item, pMem + sizeof(cson_array_size_t) + (successCount * tbl[index].arrayItemSize), tbl[index].reflect_tbl, 0);
+                ret = jsonObjProcTbl[tbl[index].reflect_tbl[0].type](item, pMem + (successCount * tbl[index].arrayItemSize), tbl[index].reflect_tbl, 0);
             } else {
-                ret = csonJsonObj2Struct(item, pMem + sizeof(cson_array_size_t) + (successCount * tbl[index].arrayItemSize), tbl[index].reflect_tbl);
+                ret = csonJsonObj2Struct(item, pMem + (successCount * tbl[index].arrayItemSize), tbl[index].reflect_tbl);
             }
 
             if (ret == ERR_NONE) {
@@ -448,8 +448,7 @@ int parseJsonArray(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int i
         csonSetPropertyFast(output, &pMem, tbl + index);
         return ERR_MISSING_FIELD;
     } else {
-        *((cson_array_size_t*)pMem) = successCount;
-        pMem += sizeof(cson_array_size_t);
+        csonSetArraySize(pMem, successCount);
         csonSetPropertyFast(output, (char*)&pMem, tbl + index);
         return ERR_NONE;
     }
@@ -696,9 +695,8 @@ void csonLoopProperty(void* pData, const reflect_item_t* tbl, loop_func_t func)
                 i++;
                 continue;
             }
-            //cson_array_size_t size = **((cson_array_size_t**)(pProperty - sizeof(cson_array_size_t)));
 
-            cson_array_size_t size = *((cson_array_size_t*)(*((char**)pProperty) - sizeof(cson_array_size_t)));
+            cson_array_size_t size = csonGetArraySize(*(void**)pProperty);
 
             for (cson_array_size_t j = 0; j < size; j++) {
                 csonLoopProperty(*((char**)pProperty) + j * tbl[i].arrayItemSize, tbl[i].reflect_tbl, func);
@@ -733,7 +731,7 @@ static void* freePointerSub(void* pData, const reflect_item_t* tbl)
         free(*(void**)pData);
     }else if(tbl->type == CSON_ARRAY){
         printf("free field %s.\n", tbl->field);
-        free((*(char**)pData) - sizeof(cson_array_size_t));
+        csonFreeArray(*(void**)pData);
     }else{
 
     }
@@ -752,6 +750,18 @@ void csonFreePointer(void* list, const reflect_item_t* tbl)
     csonLoopProperty(list, tbl, freePointerSub);
 }
 
+void* csonAllocArray(size_t bytesOfArray){
+    char* pMem = (char*)malloc(bytesOfArray + sizeof(cson_array_size_t));
+    if(pMem == NULL) return NULL;
+    return pMem + sizeof(cson_array_size_t);
+}
+
+void csonFreeArray(void* pArray){
+    if(!pArray) return;
+
+    free((char*)pArray - sizeof(cson_array_size_t));
+}
+
 cson_array_size_t csonGetArraySize(void* pArray){
     if(pArray == NULL){
         return 0;
@@ -763,4 +773,17 @@ cson_array_size_t csonGetArraySize(void* pArray){
 cson_array_size_t csonGetArraySizeByField(void* pData, const char* field, const reflect_item_t* tbl){
     void* pArray = csonGetProperty(pData, field, tbl, NULL);
     return csonGetArraySize(*((void**)pArray));
+}
+
+void csonSetArraySize(void* pArray, cson_array_size_t size){
+    if(pArray == NULL){
+        return;
+    }
+
+    *((cson_array_size_t*)((char*)pArray - sizeof(cson_array_size_t))) = size;
+}
+
+void csonSetArraySizeByField(void* pData, cson_array_size_t size, const char* field, const reflect_item_t* tbl){
+    void* pArray = csonGetProperty(pData, field, tbl, NULL);
+    csonSetArraySize(*((void**)pArray), size);
 }

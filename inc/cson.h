@@ -258,4 +258,10 @@ cson_array_size_t csonGetArraySize(void* pArray);
 
 
 cson_array_size_t csonGetArraySizeByField(void* pData, const char* field, const reflect_item_t* tbl);
+
+void* csonAllocArray(size_t bytesOfArray);
+void csonFreeArray(void* pArray);
+void csonSetArraySize(void* pArray, cson_array_size_t size);
+void csonSetArraySizeByField(void* pData, cson_array_size_t size, const char* field, const reflect_item_t* tbl);
+
 #endif
