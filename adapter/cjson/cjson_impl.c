@@ -5,6 +5,7 @@
 #include "cJSON.h"
 #include "cson.h"
 #include "string.h"
+#include "stdio.h"
 
 cson_t  cjson_impl_object_get(const cson_t object, const char* key){
     return cJSON_GetObjectItem((cJSON*)object, key);
@@ -34,7 +35,12 @@ cson_type cjson_impl_typeof(cson_t object){
 }
 
 cson_t cjson_impl_loadb(const char *buffer, size_t buflen){
-    return cJSON_Parse(buffer);
+    cson_t ret = NULL;
+    ret = cJSON_Parse(buffer);
+    if(!ret){
+        printf("parse stop with:%s\n", cJSON_GetErrorPtr());
+    }
+    return ret;
 }
 
 void cjson_impl_decref(cson_t object){

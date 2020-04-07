@@ -4,6 +4,7 @@
  */
 #include "cson.h"
 #include "jansson.h"
+#include "stdio.h"
 
 cson_t  jansson_impl_object_get(const cson_t object, const char* key){
     return json_object_get((json_t*)object, key);
@@ -14,8 +15,20 @@ cson_type jansson_impl_typeof(cson_t object){
 }
 
 cson_t jansson_impl_loadb(const char *buffer, size_t buflen){
+    cson_t ret = NULL;
     json_error_t err;
-    return json_loadb(buffer, buflen, JSON_DECODE_ANY, &err);
+
+    ret = json_loadb(buffer, buflen, JSON_DECODE_ANY, &err);
+
+    if(!ret){
+        printf("line:%d,column:%d,pos:%d,source:%s,text:%s\n",
+                    err.line,
+                    err.column,
+                    err.position,
+                    err.source,
+                    err.text);
+    }
+    return ret;
 }
 
 void jansson_impl_decref(cson_t object){

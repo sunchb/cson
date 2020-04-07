@@ -3,6 +3,12 @@
 #include "string.h"
 #include "stdlib.h"
 
+#include "assert.h"
+#include "math.h"
+
+#define CHECK_STRING(a, b)  assert(strcmp(a, b) == 0)
+#define CHECK_NUMBER(a, b)  assert(a == b)
+#define CHECK_REAL(a, b)    assert(fabs(a-b) <= 1e-6)
 /**
  * 该示例会使用cson解析如下所示播放列表。
  *
@@ -142,11 +148,11 @@ reflect_item_t song_ref_tbl[] = {
     _property_int(SongInfo, duration),
     _property_bool(SongInfo, paid),
     _property_real(SongInfo, price),
-    _property_int(SongInfo, lyricNum),
+    _property_int_ex(SongInfo, lyricNum, _ex_args_all),
     _property_array_object(SongInfo, lyric, lyric_ref_tbl, Lyric, lyricNum),
-    _property_int(SongInfo, keyNum),
+    _property_int_ex(SongInfo, keyNum, _ex_args_all),
     _property_array_int(SongInfo, key, int, keyNum),
-    _property_int(SongInfo, strNum),
+    _property_int_ex(SongInfo, strNum, _ex_args_all),
     _property_array_string(SongInfo, strList, char*, strNum),
     _property_end()
 };
@@ -160,7 +166,7 @@ reflect_item_t ext_data_ref_tbl[] = {
 reflect_item_t play_list_ref_tbl[] = {
     _property_string(PlayList, name),
     _property_string(PlayList, creater),
-    _property_int(PlayList, songNum),
+    _property_int_ex(PlayList, songNum, _ex_args_all),
     _property_array_object(PlayList, songList, song_ref_tbl, SongInfo, songNum),
     _property_obj(PlayList, extData, ext_data_ref_tbl),
     _property_end()
@@ -171,6 +177,7 @@ static void freePlayList(PlayList* list);
 
 const static char* jStr = "{\"name\":\"jay zhou\",\"creater\":\"dahuaxia\",\"songList\":[{\"songName\":\"qilixiang\",\"signerName\":\"jay zhou\",\"albumName\":\"qilixiang\",\"url\":\"www.kugou.com\",\"duration\":20093999939292928292234.1,\"paid\":false,\"price\":6.66,\"lyric\":[{\"time\":1,\"text\":\"Sparrow outside the window\"},{\"time\":10,\"text\":\"Multi mouth on the pole\"}],\"key\":[1111,2222,3333]},{\"songName\":\"dongfengpo\",\"signerName\":\"jay zhou\",\"albumName\":\"dongfengpo\",\"url\":\"music.qq.com\",\"duration\":180.9,\"paid\":true,\"price\":0.88,\"lyric\":[{\"time\":10,\"text\":\"A sad parting, standing alone in the window\"},{\"time\":20,\"text\":\"I'm behind the door pretending you're not gone\"}],\"key\":[1234,5678,9876],\"strList\":[\"abcd\",\"efgh\",\"ijkl\"]}],\"extData\":{\"a\":999,\"b\":1}}";
 
+static void checkResult(PlayList* playList, char* jstrOutput);
 /*
     Step3:调用csonJsonStr2Struct/csonStruct2JsonStr实现反序列化和序列化
 */
@@ -180,16 +187,78 @@ void test1()
     printf("\t\tRunning %s\n", __FUNCTION__);
     printf("=========================================\n");
     PlayList playList;
+    memset(&playList, 0, sizeof(playList));
 
     /* string to struct */
     int ret = csonJsonStr2Struct(jStr, &playList, play_list_ref_tbl);
+    CHECK_NUMBER(ret, 0);
+    printf("decode ret=%d\n", ret);
     /* test print */
-    printf("ret=%d\n", ret);
-    csonPrintProperty(&playList, play_list_ref_tbl);
+    //csonPrintProperty(&playList, play_list_ref_tbl);
 
     char* jstrOutput;
     ret = csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);
-    printf("ret=%d\nJson:%s\n", ret, jstrOutput);
+    CHECK_NUMBER(ret, 0);
+    printf("encode ret=%d\nJson:%s\n", ret, jstrOutput);
+
+    /*assert check*/
+    checkResult(&playList, jstrOutput);
+
     free(jstrOutput);
     csonFreePointer(&playList, play_list_ref_tbl);
+    
+    printf("Successed %s.\n", __FUNCTION__);
+}
+
+
+void checkResult(PlayList* playList, char* jstrOutput){
+    const char* encodeTest = "{\"name\":\"jay zhou\",\"creater\":\"dahuaxia\",\"songList\":[{\"songName\":\"qilixiang\",\"signerName\":\"jay zhou\",\"albumName\":\"qilixiang\",\"url\":\"www.kugou.com\",\"duration\":0,\"paid\":false,\"price\":6.66,\"lyric\":[{\"time\":1,\"text\":\"Sparrow outside the window\"},{\"time\":10,\"text\":\"Multi mouth on the pole\"}],\"key\":[1111,2222,3333]},{\"songName\":\"dongfengpo\",\"signerName\":\"jay zhou\",\"albumName\":\"dongfengpo\",\"url\":\"music.qq.com\",\"duration\":180,\"paid\":true,\"price\":0.88,\"lyric\":[{\"time\":10,\"text\":\"A sad parting, standing alone in the window\"},{\"time\":20,\"text\":\"I'm behind the door pretending you're not gone\"}],\"key\":[1234,5678,9876],\"strList\":[\"abcd\",\"efgh\",\"ijkl\"]}],\"extData\":{\"a\":999,\"b\":1}}";
+
+    /* assert test */
+    CHECK_STRING(playList->name, "jay zhou");
+    CHECK_STRING(playList->creater, "dahuaxia");
+    CHECK_NUMBER(playList->songNum, 2);
+    CHECK_STRING(playList->songList[0].songName, "qilixiang");
+    CHECK_STRING(playList->songList[0].signerName, "jay zhou");
+    CHECK_STRING(playList->songList[0].albumName, "qilixiang");
+    CHECK_STRING(playList->songList[0].url, "www.kugou.com");
+    CHECK_NUMBER(playList->songList[0].duration, 0);
+    CHECK_NUMBER(playList->songList[0].paid, 0);
+    CHECK_REAL(playList->songList[0].price, 6.66);
+    CHECK_NUMBER(playList->songList[0].lyricNum, 2);
+    CHECK_NUMBER(playList->songList[0].lyric[0].time, 1);
+    CHECK_STRING(playList->songList[0].lyric[0].text, "Sparrow outside the window");
+    CHECK_NUMBER(playList->songList[0].lyric[1].time, 10);
+    CHECK_STRING(playList->songList[0].lyric[1].text, "Multi mouth on the pole");
+    CHECK_NUMBER(playList->songList[0].keyNum, 3);
+    CHECK_NUMBER(playList->songList[0].key[0], 1111);
+    CHECK_NUMBER(playList->songList[0].key[1], 2222);
+    CHECK_NUMBER(playList->songList[0].key[2], 3333);
+    CHECK_NUMBER(playList->songList[0].strNum, 0);
+
+    CHECK_STRING(playList->songList[1].songName, "dongfengpo");
+    CHECK_STRING(playList->songList[1].signerName, "jay zhou");
+    CHECK_STRING(playList->songList[1].albumName, "dongfengpo");
+    CHECK_STRING(playList->songList[1].url, "music.qq.com");
+    CHECK_NUMBER(playList->songList[1].duration, 180);
+    CHECK_NUMBER(playList->songList[1].paid, 1);
+    CHECK_REAL(playList->songList[1].price, 0.88);
+    CHECK_NUMBER(playList->songList[1].lyricNum, 2);
+    CHECK_NUMBER(playList->songList[1].lyric[0].time, 10);
+    CHECK_STRING(playList->songList[1].lyric[0].text, "A sad parting, standing alone in the window");
+    CHECK_NUMBER(playList->songList[1].lyric[1].time, 20);
+    CHECK_STRING(playList->songList[1].lyric[1].text, "I'm behind the door pretending you're not gone");
+    CHECK_NUMBER(playList->songList[1].keyNum, 3);
+    CHECK_NUMBER(playList->songList[1].key[0], 1234);
+    CHECK_NUMBER(playList->songList[1].key[1], 5678);
+    CHECK_NUMBER(playList->songList[1].key[2], 9876);
+    CHECK_NUMBER(playList->songList[1].strNum, 3);
+    CHECK_STRING(playList->songList[1].strList[0], "abcd");
+    CHECK_STRING(playList->songList[1].strList[1], "efgh");
+    CHECK_STRING(playList->songList[1].strList[2], "ijkl");
+    CHECK_NUMBER(playList->extData.a, 999);
+    CHECK_REAL(playList->extData.b, 1);
+    
+    //It is difficult to predict the output due to the accuracy problem.
+    //CHECK_STRING(jstrOutput, encodeTest);
 }

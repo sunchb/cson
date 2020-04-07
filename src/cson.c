@@ -175,6 +175,11 @@ int csonStruct2JsonObj(cson_t obj, void* input, const reflect_item_t* tbl)
     while (1) {
         if (tbl[i].field == NULL) break;
 
+        if(tbl[i].exArgs & _ex_args_exclude_encode){
+            i++;
+            continue;
+        }
+
         cson_t joTmp = NULL;
         int jsonType = tbl[i].type;
 
@@ -184,7 +189,7 @@ int csonStruct2JsonObj(cson_t obj, void* input, const reflect_item_t* tbl)
 
         if (ret != ERR_NONE ) {
             printf("!!!!pack error on field:%s, cod=%d!!!!\n", tbl[i].field, ret);
-            if (!tbl[i].nullable) return ret;
+            if (!(tbl[i].exArgs & _ex_args_nullable)) return ret;
         } else {
             cson_object_set_new(obj, tbl[i].field, joTmp);
         }
@@ -349,6 +354,10 @@ int csonJsonObj2Struct(cson_t jo, void* output, const reflect_item_t* tbl)
     for (int i = 0;; i++) {
         int ret = ERR_NONE;
         if (tbl[i].field == NULL) break;
+        
+        if(tbl[i].exArgs & _ex_args_exclude_decode){
+            continue;
+        }
 
         cson_t jo_tmp = cson_object_get(jo, tbl[i].field);
 
@@ -372,7 +381,7 @@ int csonJsonObj2Struct(cson_t jo, void* output, const reflect_item_t* tbl)
         if (ret != ERR_NONE ) {
             printf("!!!!parse error on field:%s, cod=%d!!!!\n", tbl[i].field, ret);
             jsonObjDefaultTbl[tbl[i].type](NULL, output, tbl, i);
-            if (!tbl[i].nullable) return ret;
+            if (!(tbl[i].exArgs & _ex_args_nullable)) return ret;
         }
     }
 
@@ -383,7 +392,7 @@ int parseJsonString(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int 
 {
     const char* tempstr = cson_string_value(jo_tmp);
     if (NULL != tempstr) {
-        char* pDst = malloc(strlen(tempstr) + 1);
+        char* pDst = (char*)malloc(strlen(tempstr) + 1);
         if (pDst == NULL) {
             return ERR_MEMORY;
         }
@@ -434,6 +443,8 @@ int parseJsonArray(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int i
 
     char* pMem = (char*)malloc(arraySize * tbl[index].arrayItemSize);
     if (pMem == NULL) return ERR_MEMORY;
+
+    memset(pMem, 0, arraySize * tbl[index].arrayItemSize);
 
     long long successCount = 0;
     for (size_t j = 0; j < arraySize; j++) {
@@ -507,7 +518,13 @@ int parseJsonObjectDefault(cson_t jo_tmp, void* output, const reflect_item_t* tb
 {
     int i = 0;
     while (1) {
-        if (tbl[index].reflect_tbl[i].field == NULL) break;
+        if (tbl[i].reflect_tbl[i].field == NULL) break;
+        
+        if(tbl[i].exArgs & _ex_args_exclude_decode){
+            i++;
+            continue;
+        }
+
         jsonObjDefaultTbl[tbl[index].reflect_tbl[i].type](NULL, output, tbl[index].reflect_tbl, i);
         i++;
     };
@@ -745,8 +762,9 @@ static void* printPropertySub(void* pData, const reflect_item_t* tbl)
 static void* freePointerSub(void* pData, const reflect_item_t* tbl)
 {
     if (tbl->type == CSON_ARRAY || tbl->type == CSON_STRING) {
-        printf("free field %s.\n", tbl->field);
+        //printf("free field %s.\n", tbl->field);
         free(*(void**)pData);
+        *(void**)pData = NULL;
     }
     return NULL;
 }

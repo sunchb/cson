@@ -4,9 +4,9 @@ extern void test2();
 #include "cson.h"
 #include "stdio.h"
 
-void main()
+int main()
 {
     test1();
     test2();
-    return;
+    return 0;
 }
