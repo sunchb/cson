@@ -1,4 +1,4 @@
-# 简体中文 | [English](./README_EN.md)
+# [简体中文](./README.md) | English
 
 # cson
 Transformation between json string and struct.
