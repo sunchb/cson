@@ -194,7 +194,7 @@ void test1()
     CHECK_NUMBER(ret, 0);
     printf("decode ret=%d\n", ret);
     /* test print */
-    //csonPrintProperty(&playList, play_list_ref_tbl);
+    csonPrintProperty(&playList, play_list_ref_tbl);
 
     char* jstrOutput;
     ret = csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);

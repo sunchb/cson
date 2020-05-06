@@ -796,6 +796,29 @@ void csonSetPropertyFast(void* obj, const void* data, const reflect_item_t* tbl)
     return;
 }
 
+void csonLoopPropertyArraySub(void* pProperty, const reflect_item_t* tbl, int i, int dimen, loop_func_t func){
+    if(pProperty == NULL){
+        return;
+    }
+
+    void* ptr = *((void**)pProperty);
+
+    cson_array_size_t size = csonArrayGetSize(ptr);
+
+    if(dimen == 1){
+        for (cson_array_size_t j = 0; j < size; j++) {
+            csonLoopProperty(((char*)ptr) + j * tbl[i].arrayItemSize, tbl[i].reflect_tbl, func);
+        }
+    }else{
+        for (cson_array_size_t j = 0; j < size; j++) {
+            void** p = (void**)ptr;
+            csonLoopPropertyArraySub(p + j, tbl, i, dimen - 1, func);
+        }
+    }
+
+    func(pProperty, tbl + i);
+}
+
 void csonLoopProperty(void* pData, const reflect_item_t* tbl, loop_func_t func)
 {
     int i = 0;
@@ -804,23 +827,24 @@ void csonLoopProperty(void* pData, const reflect_item_t* tbl, loop_func_t func)
 
         char* pProperty = (char*)pData + tbl[i].offset;
         if (tbl[i].type == CSON_ARRAY) {
-            if(*((void**)pProperty) == NULL){
+            if(pProperty == NULL){
                 i++;
                 continue;
             }
-            cson_array_size_t size = csonArrayGetSize(*((void**)pProperty));
-
-            for (cson_array_size_t j = 0; j < size; j++) {
-                csonLoopProperty(*((char**)pProperty) + j * tbl[i].arrayItemSize, tbl[i].reflect_tbl, func);
-            }
+            csonLoopPropertyArraySub(pProperty, tbl, i, tbl[i].arrayDimensional, func);
         } else if (tbl[i].type == CSON_OBJECT) {
             csonLoopProperty(pProperty, tbl[i].reflect_tbl, func);
+            func(pProperty, tbl + i);
+        }else{
+            func(pProperty, tbl + i);
         }
-
-        func(pProperty, tbl + i);
 
         i++;
     }
+}
+
+void csonLoopPropertyArrayTail(void* ptr, const reflect_item_t* tbl, loop_func_t func, int dimen){
+
 }
 
 static void* printPropertySub(void* pData, const reflect_item_t* tbl)
