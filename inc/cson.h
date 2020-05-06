@@ -97,6 +97,7 @@ typedef struct reflect_item_t {
     const struct reflect_item_t*  reflect_tbl;      /**< must be specified when type is object or array */
     size_t                  arrayItemSize;          /**< size of per array item. must be specified when type is array */
     const char*             arrayCountField;        /**< field saving array size */
+    int                     arrayDimensional;
     int                     exArgs;                 /**< paser return failure when the field is not found and nullable equals to 0 */
 } reflect_item_t;
 
@@ -112,8 +113,8 @@ extern const reflect_item_t realReflectTbl[];
 
 #define _offset(type, field)                                                (size_t)(&(((type*)0)->field))
 #define _size(type, field)                                                  (sizeof(((type*)0)->field))
-#define _property(type, field, jtype, tbl, nullable)                        {#field, _offset(type, field), _size(type, field), jtype, tbl, 0, NULL, nullable}
-#define _property_end()                                                     {NULL, 0, 0, CSON_NULL, NULL, 0, NULL, 1}
+#define _property(type, field, jtype, tbl, nullable)                        {#field, _offset(type, field), _size(type, field), jtype, tbl, 0, NULL, 0, nullable}
+#define _property_end()                                                     {NULL, 0, 0, CSON_NULL, NULL, 0, NULL, 0, 1}
 
 /**
  * @brief Declaring integer properties.
@@ -171,12 +172,12 @@ extern const reflect_item_t realReflectTbl[];
  * @param count: property to save the array size
  *
  */
-#define _property_array(type, field, tbl, subType, count)                   {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, _ex_args_nullable}
-#define _property_array_object(type, field, tbl, subType, count)            _property_array(type, field, tbl, subType, count)
-#define _property_array_int(type, field, subType, count)                    _property_array(type, field, integerReflectTbl, subType, count)
-#define _property_array_string(type, field, subType, count)                 _property_array(type, field, stringReflectTbl, subType, count)
-#define _property_array_real(type, field, subType, count)                   _property_array(type, field, realReflectTbl, subType, count)
-#define _property_array_bool(type, field, subType, count)                   _property_array(type, field, boolReflectTbl, subType, count)
+#define _property_array(type, field, tbl, subType, count, dimen)            {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, dimen, _ex_args_nullable}
+#define _property_array_object(type, field, tbl, subType, count, dimen)     _property_array(type, field, tbl, subType, count, dimen)
+#define _property_array_int(type, field, subType, count, dimen)             _property_array(type, field, integerReflectTbl, subType, count, dimen)
+#define _property_array_string(type, field, subType, count, dimen)          _property_array(type, field, stringReflectTbl, subType, count, dimen)
+#define _property_array_real(type, field, subType, count, dimen)            _property_array(type, field, realReflectTbl, subType, count, dimen)
+#define _property_array_bool(type, field, subType, count, dimen)            _property_array(type, field, boolReflectTbl, subType, count, dimen)
 
 /**
  * @brief nonull definitions. parser will stop and return error code when field not found which declared whit it.
@@ -188,12 +189,12 @@ extern const reflect_item_t realReflectTbl[];
 #define _property_bool_nonull(type, field)                                  _property(type, field, CSON_TRUE, NULL, 0)
 #define _property_string_nonull(type, field)                                _property(type, field, CSON_STRING, NULL, 0)
 #define _property_obj_nonull(type, field, tbl)                              _property(type, field, CSON_OBJECT, tbl, 0)
-#define _property_array_nonull(type, field, tbl, subType, count)            {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, 0}
-#define _property_array_object_nonull(type, field, tbl, subType, count)     _property_array_nonull(type, field, tbl, subType, count)
-#define _property_array_int_nonull(type, field, subType, count)             _property_array_nonull(type, field, integerReflectTbl, subType, count)
-#define _property_array_string_nonull(type, field, subType, count)          _property_array_nonull(type, field, stringReflectTbl, subType, count)
-#define _property_array_real_nonull(type, field, subType, count)            _property_array_nonull(type, field, realReflectTbl, subType, count)
-#define _property_array_bool_nonull(type, field, subType, count)            _property_array_nonull(type, field, boolReflectTbl, subType, count)
+#define _property_array_nonull(type, field, tbl, subType, count, dimen)            {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, dimen, 0}
+#define _property_array_object_nonull(type, field, tbl, subType, count, dimen)     _property_array_nonull(type, field, tbl, subType, count, dimen)
+#define _property_array_int_nonull(type, field, subType, count, dimen)             _property_array_nonull(type, field, integerReflectTbl, subType, count, dimen)
+#define _property_array_string_nonull(type, field, subType, count, dimen)          _property_array_nonull(type, field, stringReflectTbl, subType, count, dimen)
+#define _property_array_real_nonull(type, field, subType, count, dimen)            _property_array_nonull(type, field, realReflectTbl, subType, count, dimen)
+#define _property_array_bool_nonull(type, field, subType, count, dimen)            _property_array_nonull(type, field, boolReflectTbl, subType, count, dimen)
 
 /**
  * @brief nonull definitions. parser will stop and return error code when field not found which declared whit it.
@@ -206,12 +207,12 @@ extern const reflect_item_t realReflectTbl[];
 #define _property_bool_ex(type, field, args)                                _property(type, field, CSON_TRUE, NULL, args)
 #define _property_string_ex(type, field, args)                              _property(type, field, CSON_STRING, NULL, args)
 #define _property_obj_ex(type, field, tbl, args)                            _property(type, field, CSON_OBJECT, tbl, args)
-#define _property_array_ex(type, field, tbl, subType, count, args)          {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, args}
-#define _property_array_object_ex(type, field, tbl, subType, count, args)   _property_array_ex(type, field, tbl, subType, count)
-#define _property_array_int_ex(type, field, subType, count, args)           _property_array_ex(type, field, integerReflectTbl, subType, count)
-#define _property_array_string_ex(type, field, subType, count, args)        _property_array_ex(type, field, stringReflectTbl, subType, count)
-#define _property_array_real_ex(type, field, subType, count, args)          _property_array_ex(type, field, realReflectTbl, subType, count)
-#define _property_array_bool_ex(type, field, subType, count, args)          _property_array_ex(type, field, boolReflectTbl, subType, count)
+#define _property_array_ex(type, field, tbl, subType, count, dimen, args)   {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, dimen, args}
+#define _property_array_object_ex(type, field, tbl, subType, count, dimen, args)    _property_array_ex(type, field, tbl, subType, count, dimen)
+#define _property_array_int_ex(type, field, subType, count, dimen, args)    _property_array_ex(type, field, integerReflectTbl, subType, count, dimen)
+#define _property_array_string_ex(type, field, subType, count, dimen, args) _property_array_ex(type, field, stringReflectTbl, subType, count, dimen)
+#define _property_array_real_ex(type, field, subType, count, dimen, args)   _property_array_ex(type, field, realReflectTbl, subType, count, dimen)
+#define _property_array_bool_ex(type, field, subType, count, dimen, args)   _property_array_ex(type, field, boolReflectTbl, subType, count, dimen)
 
 /**
  * @brief function type of csonLoopProperty.
@@ -275,5 +276,12 @@ void csonPrintProperty(void* pData, const reflect_item_t* tbl);
  * @return void.
  */
 void csonFreePointer(void* list, const reflect_item_t* tbl);
+
+#define _CSON_SUPPORT_MULTI_ARRAY_
+#ifdef _CSON_SUPPORT_MULTI_ARRAY_
+typedef size_t  cson_array_size_t;
+cson_array_size_t csonArrayGetSize(void* ptr);
+cson_array_size_t csonArrayGetSizeByField(void* pData, const char* field, const reflect_item_t* tbl);
+#endif
 
 #endif
