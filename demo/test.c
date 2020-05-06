@@ -197,14 +197,14 @@ void test1()
     //csonPrintProperty(&playList, play_list_ref_tbl);
 
     char* jstrOutput;
-    // ret = csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);
-    // CHECK_NUMBER(ret, 0);
-    // printf("encode ret=%d\nJson:%s\n", ret, jstrOutput);
+    ret = csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);
+    CHECK_NUMBER(ret, 0);
+    printf("encode ret=%d\nJson:%s\n", ret, jstrOutput);
 
     /*assert check*/
     checkResult(&playList, jstrOutput);
 
-    //free(jstrOutput);
+    free(jstrOutput);
     csonFreePointer(&playList, play_list_ref_tbl);
     
     printf("Successed %s.\n", __FUNCTION__);
