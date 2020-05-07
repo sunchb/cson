@@ -146,7 +146,6 @@ static int csonJsonObj2Struct(cson_t jo, void* output, const reflect_item_t* tbl
 
 typedef struct {
     cson_array_size_t       size;
-    cson_array_size_t       sizePerItem;
     int                     dimen;
 } cson_array_header_t;
 
@@ -155,19 +154,11 @@ typedef struct {
     void*                   ptr;
 } cson_array_t;
 
-void* csonArrayAlloc(cson_array_size_t count, cson_array_size_t sizePerItem);
-void csonArrayFree(void* ptr);
-cson_array_size_t csonArrayGetSize(void* ptr);
-void csonArraySetSize(void* ptr, cson_array_size_t size);
-cson_array_size_t csonArrayGetSizeByField(void* pData, const char* field, const reflect_item_t* tbl);
-void csonArraySetSizeByField(void* pData, const char* field, const reflect_item_t* tbl, cson_array_size_t size);
 void* parseJsonArraySub(cson_t jo_tmp, const reflect_item_t* tbl, int index, int dimen);
 void* parseJsonArrayTail(cson_t jo_tmp, const reflect_item_t* tbl, int index);
-void csonArraySetDimen(void* ptr, int dimen);
-int csonArrayGetDimen(void* ptr);
-
 cson_t getJsonArrayTail(void* ptr, const reflect_item_t* tbl, int index);
 cson_t getJsonArraySub(void* ptr, const reflect_item_t* tbl, int index);
+void csonLoopPropertyArraySub(void* pProperty, const reflect_item_t* tbl, int i, int dimen, loop_func_t func);
 
 int csonStruct2JsonStr(char** jstr, void* input, const reflect_item_t* tbl)
 {
@@ -272,15 +263,12 @@ int getJsonObject(void* input, const reflect_item_t* tbl, int index, cson_t* obj
 
 cson_t getJsonArraySub(void* ptr, const reflect_item_t* tbl, int index){
     int dimen = csonArrayGetDimen(ptr);
-    printf("filed:%s,dimen=%d\n", tbl[index].field, dimen);
     if(csonArrayGetDimen(ptr) == 1){
         return getJsonArrayTail(ptr, tbl, index);
     }else{
         cson_t joArray = cson_array();
 
         cson_array_size_t size = csonArrayGetSize(ptr);
-        printf("filed:%s,size=%zu\n", tbl[index].field, size);
-
         cson_array_size_t successCount = 0;
 
         for(cson_array_size_t i = 0; i < size; i++){
@@ -481,8 +469,6 @@ int parseJsonObject(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int 
 }
 
 int parseJsonArray(cson_t jo_tmp, void* output, const reflect_item_t* tbl, int index){
-    //检查维度
-    printf("arrayDimensional:%d\n", tbl[index].arrayDimensional);
     void* pRet = parseJsonArraySub(jo_tmp, tbl, index, tbl[index].arrayDimensional);
     csonSetPropertyFast(output, &pRet, tbl + index);
     return ERR_NONE;
@@ -843,10 +829,6 @@ void csonLoopProperty(void* pData, const reflect_item_t* tbl, loop_func_t func)
     }
 }
 
-void csonLoopPropertyArrayTail(void* ptr, const reflect_item_t* tbl, loop_func_t func, int dimen){
-
-}
-
 static void* printPropertySub(void* pData, const reflect_item_t* tbl)
 {
     if (tbl->type == CSON_ARRAY || tbl->type == CSON_OBJECT) return NULL;
@@ -869,6 +851,7 @@ static void* freePointerSub(void* pData, const reflect_item_t* tbl)
     }else if(tbl->type == CSON_ARRAY){
         //printf("free field %s.\n", tbl->field);
         csonArrayFree(*(void**)pData);
+        *(void**)pData = NULL;
     }else{
 
     }
@@ -935,3 +918,39 @@ void csonArraySetSizeByField(void* pData, const char* field, const reflect_item_
     csonArraySetSize(*((void**)pArray), size);
 }
 
+void* csonAllocMultiDimenArray(int dimen, cson_array_size_t* sizePerDimen, size_t sizeOfItem){
+    if(dimen <= 0 || !sizePerDimen || sizeOfItem == 0) return NULL;
+
+    if(dimen == 1){
+        void* p = csonArrayAlloc(sizePerDimen[0], sizeOfItem);
+        csonArraySetSize(p, sizePerDimen[0]);
+        csonArraySetDimen(p, dimen);
+        return p;
+    }else{
+        void** p = (void**)csonArrayAlloc(sizePerDimen[0], sizeof(void*));
+
+        for(int i = 0; i < sizePerDimen[0]; i++){
+            p[i] = csonAllocMultiDimenArray(dimen - 1, sizePerDimen + 1, sizeOfItem);
+        }
+        csonArraySetSize(p, sizePerDimen[0]);
+        csonArraySetDimen(p, dimen);
+        return (void*)p;
+    }
+}
+
+void csonFreeMultiDimenArray(void* p){
+    if(!p) return;
+
+    int dimen = csonArrayGetDimen(p);
+
+    if(dimen == 1){
+        csonArrayFree(p);
+    }else{
+        cson_array_size_t size = csonArrayGetSize(p);
+        void** ptr = (void**)p;
+        for(int i = 0; i < size; i++){
+            csonFreeMultiDimenArray(ptr[i]);
+        }
+        csonArrayFree(p);
+    }
+}
