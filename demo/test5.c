@@ -12,20 +12,32 @@
 #define CHECK_REAL(a, b)    assert(fabs(a-b) <= 1e-6)
 
 typedef struct {
+    char*           name;
+    int             num;
+} Data;
+
+typedef struct {
     int***          array;
     char****        strArray;
+    Data***         objArray;
 } MultiArrayTest;
+
+reflect_item_t  data_ref_tbl[] = {
+    _property_string(Data, name),
+    _property_int(Data, num),
+    _property_end()
+};
 
 reflect_item_t multi_array_ref_tbl[] = {
     _property_array_int(MultiArrayTest, array, int, NULL, 3),
     _property_array_string(MultiArrayTest, strArray, char*, NULL, 3),
+    _property_array_object(MultiArrayTest, objArray, data_ref_tbl, Data, NULL, 3),
     _property_end()
 };
 
 void* freePointerOfArray(void* pData, const reflect_item_t* tbl)
 {
     if(tbl->type == CSON_ARRAY){
-        //printf("free field %s.\n", tbl->field);
         csonArrayFree(*(void**)pData);
         *(void**)pData = NULL;
     }
@@ -40,6 +52,7 @@ void test5(){
 
     testObj.array = (int***)csonAllocMultiDimenArray(3, dimenSize, sizeof(int));
     testObj.strArray = (char****)csonAllocMultiDimenArray(3, dimenSize, sizeof(char*));
+    testObj.objArray = (Data***)csonAllocMultiDimenArray(3, dimenSize, sizeof(Data));
     char* testStr = "str";
 
     int num = 1;
@@ -48,7 +61,8 @@ void test5(){
             for(int k = 0; k < dimenSize[2]; k++){
                 testObj.array[i][j][k] = num++;
                 testObj.strArray[i][j][k] = testStr;
-                
+                testObj.objArray[i][j][k].num = num++;
+                testObj.objArray[i][j][k].name = testStr;
             }
         }
     }
@@ -58,6 +72,7 @@ void test5(){
         for(int j = 0; j < dimenSize[1]; j++){
             for(int k = 0; k < dimenSize[2]; k++){
                 CHECK_NUMBER(testObj.array[i][j][k], num++);
+                CHECK_NUMBER(testObj.objArray[i][j][k].num, num++);
             }
         }
     }
