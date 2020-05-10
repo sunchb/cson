@@ -92,6 +92,7 @@ https://github.com/DaveGamble/cJSON.git
 - 字符串必须定义为char*类型。
 - 数组必须定义为指针类型。
 - 如果结构体包含数组，需要为每一个数组定义一个额外的属性，用于保存数组大小。
+- 结构体属性名必须与Json字段名一致。
 
 ``` c
 typedef struct {

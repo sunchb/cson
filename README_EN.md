@@ -94,6 +94,7 @@ Even if you don't use cson, you usually need to do like this.
 - String must be declared as char*.
 - Array must be declared as pointer.
 - Declare additional properties to hold the array size for every array property.
+- The structure property name must be the same as the JSON field name.
 
 ``` c
 typedef struct {
