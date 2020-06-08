@@ -1,3 +1,4 @@
+#ifndef _CSON_MULTI_ARRAY_SUPPORT_
 #include "cson.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -235,3 +236,4 @@ void checkResult(Response* resp, char* jstrOutput){
 
     CHECK_STRING(jstrOutput, encodeTest);
 }
+#endif

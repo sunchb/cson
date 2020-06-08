@@ -27,6 +27,7 @@ OBJS += $(patsubst $(SRC_DIR)/%.c, $(OUT_DIR)/%.o, $(SRC_FILES))
 OBJS += $(patsubst $(TEST_SRC_DIR)/%.c, $(OUT_DIR)/%.o, $(TEST_SRC_FILES))
 OBJS += $(patsubst $(ADAP_DIR)/%.c, $(OUT_DIR)/%.o, $(ADAP_FILES))
 
+#CFLAGS += -D_CSON_MULTI_ARRAY_SUPPORT_
 
 $(TARGET):$(OBJS)
 	@$(CC) $(LIB_PATH) -g $(OBJS) -o $(TARGET) -fprofile-arcs -ftest-coverage
@@ -34,16 +35,16 @@ $(TARGET):$(OBJS)
 ## rule for source file
 $(OUT_DIR)/%.o:$(SRC_DIR)/%.c
 	@$(MD) $(OUT_DIR)
-	$(CC) $(INC) -Wno-int-conversion -fprofile-arcs -ftest-coverage -c -g $< -o $@
+	$(CC) $(INC) $(CFLAGS) -Wno-int-conversion -fprofile-arcs -ftest-coverage -c -g $< -o $@
 
 $(OUT_DIR)/%.o:$(ADAP_DIR)/%.c
 	@$(MD) $(OUT_DIR)
-	$(CC) $(INC) -Wno-int-conversion -fprofile-arcs -ftest-coverage -c -g $< -o $@
+	$(CC) $(INC) $(CFLAGS) -Wno-int-conversion -fprofile-arcs -ftest-coverage -c -g $< -o $@
 	
 ## rule for test source file
 $(OUT_DIR)/%.o:$(TEST_SRC_DIR)/%.c
 	@$(MD) $(OUT_DIR)
-	$(CC) $(INC) -Wno-int-conversion -c -g $< -o $@
+	$(CC) $(INC) $(CFLAGS) -Wno-int-conversion -c -g $< -o $@
 
 .PHONY:report run clean memchk
 

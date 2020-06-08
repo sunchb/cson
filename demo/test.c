@@ -1,3 +1,4 @@
+#ifndef _CSON_MULTI_ARRAY_SUPPORT_
 #include "cson.h"
 #include "stdio.h"
 #include "string.h"
@@ -262,3 +263,4 @@ void checkResult(PlayList* playList, char* jstrOutput){
     //It is difficult to predict the output due to the accuracy problem.
     //CHECK_STRING(jstrOutput, encodeTest);
 }
+#endif
