@@ -108,13 +108,13 @@ void checkResult(Response* resp, char* jstrOutput){
     
     CHECK_NUMBER(resp->status, 1);
     CHECK_NUMBER(resp->data.timestamp, 1579069151);
-    //CHECK_NUMBER(resp->data.infoNum, 9);
+    CHECK_NUMBER(resp->data.infoNum, 9);
 
     CHECK_NUMBER(resp->data.info[0].has_child, 1);
     CHECK_STRING(resp->data.info[0].icon, "http://imge.kugou.com/mcommon/{size}/20181130/20181130172444711866.png");
     CHECK_NUMBER(resp->data.info[0].id, 153);
     CHECK_STRING(resp->data.info[0].name, "专区");
-    //CHECK_NUMBER(resp->data.info[0].childrenNum, 16);
+    CHECK_NUMBER(resp->data.info[0].childrenNum, 16);
     CHECK_STRING(resp->data.info[0].children[0].name, "DJ专区");
     CHECK_STRING(resp->data.info[0].children[0].jump_url, "https://miniapp.kugou.com/node/v2?type=1&id=74&path=%2Findex.html%23%2Fmobile%2Fhome%2F1");
     CHECK_STRING(resp->data.info[0].children[1].name, "抖音专区");
@@ -153,7 +153,7 @@ void checkResult(Response* resp, char* jstrOutput){
     CHECK_STRING(resp->data.info[1].icon, "http://imge.kugou.com/mcommon/{size}/20191104/20191104103209217784.png");
     CHECK_NUMBER(resp->data.info[1].id, 2005);
     CHECK_STRING(resp->data.info[1].name, "心情");
-    //CHECK_NUMBER(resp->data.info[1].childrenNum, 9);
+    CHECK_NUMBER(resp->data.info[1].childrenNum, 9);
     CHECK_STRING(resp->data.info[1].children[0].name, "伤感专区");
     CHECK_STRING(resp->data.info[1].children[1].name, "安静专区");
     CHECK_STRING(resp->data.info[1].children[2].name, "对抗抑郁专区");
@@ -169,7 +169,7 @@ void checkResult(Response* resp, char* jstrOutput){
     CHECK_STRING(resp->data.info[2].icon, "http://imge.kugou.com/mcommon/{size}/20181130/20181130172455112096.png");
     CHECK_NUMBER(resp->data.info[2].id, 1263);
     CHECK_STRING(resp->data.info[2].name, "特色");
-    //CHECK_NUMBER(resp->data.info[2].childrenNum, 16);
+    CHECK_NUMBER(resp->data.info[2].childrenNum, 16);
     CHECK_STRING(resp->data.info[2].children[0].name, "官方歌单");
     CHECK_STRING(resp->data.info[2].children[1].name, "重返2010专区");
     CHECK_STRING(resp->data.info[2].children[2].name, "佛乐专区");
@@ -201,37 +201,37 @@ void checkResult(Response* resp, char* jstrOutput){
     CHECK_STRING(resp->data.info[3].icon, "http://imge.kugou.com/mcommon/{size}/20191104/20191104103220446249.png");
     CHECK_NUMBER(resp->data.info[3].id, 2003);
     CHECK_STRING(resp->data.info[3].name, "场景");
-    //CHECK_NUMBER(resp->data.info[3].childrenNum, 9);
+    CHECK_NUMBER(resp->data.info[3].childrenNum, 9);
 
     CHECK_NUMBER(resp->data.info[4].has_child, 1);
     CHECK_STRING(resp->data.info[4].icon, "http://imge.kugou.com/mcommon/{size}/20191104/20191104103232420148.png");
     CHECK_NUMBER(resp->data.info[4].id, 2007);
     CHECK_STRING(resp->data.info[4].name, "主题");
-    //CHECK_NUMBER(resp->data.info[4].childrenNum, 14);
+    CHECK_NUMBER(resp->data.info[4].childrenNum, 14);
 
     CHECK_NUMBER(resp->data.info[5].has_child, 0);
     CHECK_STRING(resp->data.info[5].icon, "http://imge.kugou.com/mcommon/{size}/20181130/20181130172345416784.png");
     CHECK_NUMBER(resp->data.info[5].id, 32);
     CHECK_STRING(resp->data.info[5].name, "年代");
-    //CHECK_NUMBER(resp->data.info[5].childrenNum, 4);
+    CHECK_NUMBER(resp->data.info[5].childrenNum, 4);
 
     CHECK_NUMBER(resp->data.info[6].has_child, 1);
     CHECK_STRING(resp->data.info[6].icon, "http://imge.kugou.com/mcommon/{size}/20191202/20191202161746384633.png");
     CHECK_NUMBER(resp->data.info[6].id, 2009);
     CHECK_STRING(resp->data.info[6].name, "语言");
-    //CHECK_NUMBER(resp->data.info[6].childrenNum, 9);
+    CHECK_NUMBER(resp->data.info[6].childrenNum, 9);
 
     CHECK_NUMBER(resp->data.info[7].has_child, 1);
     CHECK_STRING(resp->data.info[7].icon, "http://imge.kugou.com/mcommon/{size}/20191104/20191104102344527371.png");
     CHECK_NUMBER(resp->data.info[7].id, 1599);
     CHECK_STRING(resp->data.info[7].name, "风格");
-    //CHECK_NUMBER(resp->data.info[7].childrenNum, 21);
+    CHECK_NUMBER(resp->data.info[7].childrenNum, 21);
 
     CHECK_NUMBER(resp->data.info[8].has_child, 0);
     CHECK_STRING(resp->data.info[8].icon, "http://imge.kugou.com/mcommon/{size}/20181130/20181130172408696210.png");
     CHECK_NUMBER(resp->data.info[8].id, 58);
     CHECK_STRING(resp->data.info[8].name, "乐器");
-    //CHECK_NUMBER(resp->data.info[8].childrenNum, 10);
+    CHECK_NUMBER(resp->data.info[8].childrenNum, 10);
 
     CHECK_STRING(jstrOutput, encodeTest);
 }

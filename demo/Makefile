@@ -29,7 +29,7 @@ OBJS += $(patsubst $(ADAP_DIR)/%.c, $(OUT_DIR)/%.o, $(ADAP_FILES))
 
 
 $(TARGET):$(OBJS)
-	@$(CC) $(LIB_PATH) -g -Wl,--whole-archive -Wl,-O1 -Wl,-Map,$(OUT_DIR)/test.map -Wl,--no-whole-archive -fPIC $(OBJS) -o $(TARGET) -lgcov
+	@$(CC) $(LIB_PATH) -g $(OBJS) -o $(TARGET) -fprofile-arcs -ftest-coverage
 
 ## rule for source file
 $(OUT_DIR)/%.o:$(SRC_DIR)/%.c

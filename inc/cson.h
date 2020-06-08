@@ -277,6 +277,7 @@ void csonPrintProperty(void* pData, const reflect_item_t* tbl);
  */
 void csonFreePointer(void* list, const reflect_item_t* tbl);
 
+#ifdef _CSON_MULTI_ARRAY_SUPPORT_
 /*
     for Multidimensional array support
 */
@@ -360,5 +361,6 @@ void* csonAllocMultiDimenArray(int dimen, cson_array_size_t* sizePerDimen, size_
  * @return void*.
  */
 void csonFreeMultiDimenArray(void* p);
+#endif
 
 #endif
