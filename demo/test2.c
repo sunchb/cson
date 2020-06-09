@@ -1,4 +1,3 @@
-#ifndef _CSON_MULTI_ARRAY_SUPPORT_
 #include "cson.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -94,7 +93,7 @@ void test2()
     char* jstrOutput;
     ret = csonStruct2JsonStr(&jstrOutput, &resp, ResponseTbl);
     CHECK_NUMBER(ret, 0);
-    printf("encode ret=%d\nJson:%s\n", ret, jstrOutput);
+    //printf("encode ret=%d\nJson:%s\n", ret, jstrOutput);
 
     /*assert check*/
     checkResult(&resp, jstrOutput);
@@ -105,8 +104,9 @@ void test2()
     printf("Successed %s.\n", __FUNCTION__);
 }
 
-void checkResult(Response* resp, char* jstrOutput){
-    
+void checkResult(Response* resp, char* jstrOutput)
+{
+
     CHECK_NUMBER(resp->status, 1);
     CHECK_NUMBER(resp->data.timestamp, 1579069151);
     CHECK_NUMBER(resp->data.infoNum, 9);
@@ -236,4 +236,3 @@ void checkResult(Response* resp, char* jstrOutput){
 
     CHECK_STRING(jstrOutput, encodeTest);
 }
-#endif

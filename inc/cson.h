@@ -39,7 +39,7 @@ typedef void*   cson_t;
  */
 typedef cson_t      (*func_cson_object_get)(const cson_t object, const char* key);
 typedef cson_type   (*func_cson_typeof)(cson_t object);
-typedef cson_t      (*func_cson_loadb)(const char *buffer, size_t buflen);
+typedef cson_t      (*func_cson_loadb)(const char* buffer, size_t buflen);
 typedef void        (*func_cson_decref)(cson_t object);
 typedef const char* (*func_cson_string_value)(const cson_t object);
 typedef size_t      (*func_cson_string_length)(const cson_t object);
@@ -96,8 +96,8 @@ typedef struct reflect_item_t {
     cson_type               type;                   /**< corresponding json type */
     const struct reflect_item_t*  reflect_tbl;      /**< must be specified when type is object or array */
     size_t                  arrayItemSize;          /**< size of per array item. must be specified when type is array */
-    const char*             arrayCountField;        /**< field saving array size */
-    int                     arrayDimensional;
+    const char*             arrayCountField;        /**< field saving array size. Valid only for one-dimensional arrays, because the size of a multidimensional array cannot be saved in one number. */
+    int                     arrayDimensional;       /**< dimension of array */
     int                     exArgs;                 /**< paser return failure when the field is not found and nullable equals to 0 */
 } reflect_item_t;
 
@@ -170,6 +170,7 @@ extern const reflect_item_t realReflectTbl[];
  * @param tbl: property description table of type of array
  * @param subType: type of array
  * @param count: property to save the array size
+ * @param dimen: dimension of array
  *
  */
 #define _property_array(type, field, tbl, subType, count, dimen)            {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, dimen, _ex_args_nullable}
@@ -184,17 +185,17 @@ extern const reflect_item_t realReflectTbl[];
  *
  * @param refer to comment of nullable definition
  */
-#define _property_int_nonull(type, field)                                   _property(type, field, CSON_INTEGER, NULL, 0)
-#define _property_real_nonull(type, field)                                  _property(type, field, CSON_REAL, NULL, 0)
-#define _property_bool_nonull(type, field)                                  _property(type, field, CSON_TRUE, NULL, 0)
-#define _property_string_nonull(type, field)                                _property(type, field, CSON_STRING, NULL, 0)
-#define _property_obj_nonull(type, field, tbl)                              _property(type, field, CSON_OBJECT, tbl, 0)
-#define _property_array_nonull(type, field, tbl, subType, count, dimen)            {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, dimen, 0}
-#define _property_array_object_nonull(type, field, tbl, subType, count, dimen)     _property_array_nonull(type, field, tbl, subType, count, dimen)
-#define _property_array_int_nonull(type, field, subType, count, dimen)             _property_array_nonull(type, field, integerReflectTbl, subType, count, dimen)
-#define _property_array_string_nonull(type, field, subType, count, dimen)          _property_array_nonull(type, field, stringReflectTbl, subType, count, dimen)
-#define _property_array_real_nonull(type, field, subType, count, dimen)            _property_array_nonull(type, field, realReflectTbl, subType, count, dimen)
-#define _property_array_bool_nonull(type, field, subType, count, dimen)            _property_array_nonull(type, field, boolReflectTbl, subType, count, dimen)
+// #define _property_int_nonull(type, field)                                   _property(type, field, CSON_INTEGER, NULL, 0)
+// #define _property_real_nonull(type, field)                                  _property(type, field, CSON_REAL, NULL, 0)
+// #define _property_bool_nonull(type, field)                                  _property(type, field, CSON_TRUE, NULL, 0)
+// #define _property_string_nonull(type, field)                                _property(type, field, CSON_STRING, NULL, 0)
+// #define _property_obj_nonull(type, field, tbl)                              _property(type, field, CSON_OBJECT, tbl, 0)
+// #define _property_array_nonull(type, field, tbl, subType, count, dimen)            {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, dimen, 0}
+// #define _property_array_object_nonull(type, field, tbl, subType, count, dimen)     _property_array_nonull(type, field, tbl, subType, count, dimen)
+// #define _property_array_int_nonull(type, field, subType, count, dimen)             _property_array_nonull(type, field, integerReflectTbl, subType, count, dimen)
+// #define _property_array_string_nonull(type, field, subType, count, dimen)          _property_array_nonull(type, field, stringReflectTbl, subType, count, dimen)
+// #define _property_array_real_nonull(type, field, subType, count, dimen)            _property_array_nonull(type, field, realReflectTbl, subType, count, dimen)
+// #define _property_array_bool_nonull(type, field, subType, count, dimen)            _property_array_nonull(type, field, boolReflectTbl, subType, count, dimen)
 
 /**
  * @brief nonull definitions. parser will stop and return error code when field not found which declared whit it.
@@ -304,44 +305,6 @@ void* csonArrayAlloc(cson_array_size_t count, cson_array_size_t sizePerItem);
 void csonArrayFree(void* ptr);
 
 /**
- * @brief get size(item count) of array
- *
- * @param ptr: array
- *
- * @return cson_array_size_t.
- */
-cson_array_size_t csonArrayGetSize(void* ptr);
-
-/**
- * @brief set size(item count) of array
- *
- * @param ptr: array
- * @param size: size
- *
- * @return cson_array_size_t.
- */
-void csonArraySetSize(void* ptr, cson_array_size_t size);
-
-/**
- * @brief set dimension of array
- *
- * @param ptr: array
- * @param dimen: dimension
- *
- * @return cson_array_size_t.
- */
-void csonArraySetDimen(void* ptr, int dimen);
-
-/**
- * @brief get dimension of array
- *
- * @param ptr: array
- *
- * @return cson_array_size_t.
- */
-int csonArrayGetDimen(void* ptr);
-
-/**
  * @brief fast alloc multi-dimen array
  *
  * @param dimen: dimen of array.
@@ -353,11 +316,34 @@ int csonArrayGetDimen(void* ptr);
 void* csonAllocMultiDimenArray(int dimen, cson_array_size_t* sizePerDimen, size_t sizeOfItem);
 
 /**
- * @brief fast free multi-dimen array
- *
- * @param p: pointer of array.
- *
- * @return void*.
+ * @brief the description of multidimensional array.
  */
 void csonFreeMultiDimenArray(void* p);
+typedef struct {
+    cson_array_size_t       size;
+    cson_array_size_t       cap;
+    int                     dimen;
+} cson_array_header_t;
+
+/**
+ * @brief get/set size of array
+ *
+ * @param p: pointer of array.
+ */
+#define array_size(p)  ((((cson_array_header_t*)p) - 1)->size)
+
+/**
+ * @brief get/set dimen of array
+ *
+ * @param p: pointer of array.
+ */
+#define array_dimen(p)  ((((cson_array_header_t*)p) - 1)->dimen)
+
+/**
+ * @brief get/set capability of array
+ *
+ * @param p: pointer of array.
+ */
+#define array_cap(p)  ((((cson_array_header_t*)p) - 1)->cap)
+
 #endif

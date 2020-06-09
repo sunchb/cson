@@ -27,8 +27,6 @@ OBJS += $(patsubst $(SRC_DIR)/%.c, $(OUT_DIR)/%.o, $(SRC_FILES))
 OBJS += $(patsubst $(TEST_SRC_DIR)/%.c, $(OUT_DIR)/%.o, $(TEST_SRC_FILES))
 OBJS += $(patsubst $(ADAP_DIR)/%.c, $(OUT_DIR)/%.o, $(ADAP_FILES))
 
-#CFLAGS += -D_CSON_MULTI_ARRAY_SUPPORT_
-
 $(TARGET):$(OBJS)
 	@$(CC) $(LIB_PATH) -g $(OBJS) -o $(TARGET) -fprofile-arcs -ftest-coverage
 

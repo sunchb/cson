@@ -1,4 +1,3 @@
-#ifndef _CSON_MULTI_ARRAY_SUPPORT_
 #include "cson.h"
 #include "stdio.h"
 #include "string.h"
@@ -200,19 +199,20 @@ void test1()
     char* jstrOutput;
     ret = csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);
     CHECK_NUMBER(ret, 0);
-    printf("encode ret=%d\nJson:%s\n", ret, jstrOutput);
+    //printf("encode ret=%d\nJson:%s\n", ret, jstrOutput);
 
     /*assert check*/
     checkResult(&playList, jstrOutput);
 
     free(jstrOutput);
     csonFreePointer(&playList, play_list_ref_tbl);
-    
+
     printf("Successed %s.\n", __FUNCTION__);
 }
 
 
-void checkResult(PlayList* playList, char* jstrOutput){
+void checkResult(PlayList* playList, char* jstrOutput)
+{
     const char* encodeTest = "{\"name\":\"jay zhou\",\"creater\":\"dahuaxia\",\"songList\":[{\"songName\":\"qilixiang\",\"signerName\":\"jay zhou\",\"albumName\":\"qilixiang\",\"url\":\"www.kugou.com\",\"duration\":0,\"paid\":false,\"price\":6.66,\"lyric\":[{\"time\":1,\"text\":\"Sparrow outside the window\"},{\"time\":10,\"text\":\"Multi mouth on the pole\"}],\"key\":[1111,2222,3333]},{\"songName\":\"dongfengpo\",\"signerName\":\"jay zhou\",\"albumName\":\"dongfengpo\",\"url\":\"music.qq.com\",\"duration\":180,\"paid\":true,\"price\":0.88,\"lyric\":[{\"time\":10,\"text\":\"A sad parting, standing alone in the window\"},{\"time\":20,\"text\":\"I'm behind the door pretending you're not gone\"}],\"key\":[1234,5678,9876],\"strList\":[\"abcd\",\"efgh\",\"ijkl\"]}],\"extData\":{\"a\":999,\"b\":1}}";
 
     /* assert test */
@@ -259,8 +259,7 @@ void checkResult(PlayList* playList, char* jstrOutput){
     CHECK_STRING(playList->songList[1].strList[2], "ijkl");
     CHECK_NUMBER(playList->extData.a, 999);
     CHECK_REAL(playList->extData.b, 1);
-    
+
     //It is difficult to predict the output due to the accuracy problem.
     //CHECK_STRING(jstrOutput, encodeTest);
 }
-#endif
