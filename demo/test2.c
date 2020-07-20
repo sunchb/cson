@@ -49,14 +49,14 @@ reflect_item_t  ClassInfoTbl[] = {
     _property_int(ClassInfo, id),
     _property_string(ClassInfo, name),
     _property_int_ex(ClassInfo, childrenNum, _ex_args_all),
-    _property_array_object(ClassInfo, children, ClassInfoChildTbl, ClassInfoChild, childrenNum),
+    _property_array_object(ClassInfo, children, ClassInfoChildTbl, ClassInfoChild, childrenNum, 1),
     _property_end()
 };
 
 reflect_item_t  DataTbl[] = {
     _property_int(Data, timestamp),
     _property_int_ex(Data, infoNum, _ex_args_all),
-    _property_array_object(Data, info, ClassInfoTbl, ClassInfo, infoNum),
+    _property_array_object(Data, info, ClassInfoTbl, ClassInfo, infoNum, 1),
     _property_end()
 };
 
@@ -93,7 +93,7 @@ void test2()
     char* jstrOutput;
     ret = csonStruct2JsonStr(&jstrOutput, &resp, ResponseTbl);
     CHECK_NUMBER(ret, 0);
-    printf("encode ret=%d\nJson:%s\n", ret, jstrOutput);
+    //printf("encode ret=%d\nJson:%s\n", ret, jstrOutput);
 
     /*assert check*/
     checkResult(&resp, jstrOutput);
@@ -104,8 +104,9 @@ void test2()
     printf("Successed %s.\n", __FUNCTION__);
 }
 
-void checkResult(Response* resp, char* jstrOutput){
-    
+void checkResult(Response* resp, char* jstrOutput)
+{
+
     CHECK_NUMBER(resp->status, 1);
     CHECK_NUMBER(resp->data.timestamp, 1579069151);
     CHECK_NUMBER(resp->data.infoNum, 9);
