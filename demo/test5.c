@@ -28,7 +28,7 @@ reflect_item_t  data_ref_tbl[] = {
 };
 
 reflect_item_t multi_array_ref_tbl[] = {
-    _property_array_int(MultiArrayTest, array, int, NULL, 3),                       //3D array
+    _property_array_int32(MultiArrayTest, array, int, NULL, 3),                     //3D array
     _property_array_string(MultiArrayTest, strArray, char*, NULL, 3),               //3D array
     _property_array_object(MultiArrayTest, objArray, data_ref_tbl, Data, NULL, 3),  //3D array
     _property_end()

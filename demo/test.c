@@ -113,7 +113,7 @@ typedef struct {
     size_t      lyricNum;
     Lyric*      lyric;
     size_t      keyNum;
-    int*        key;
+    char*        key;
     size_t      strNum;
     char**      strList;
 } SongInfo;
@@ -151,7 +151,7 @@ reflect_item_t song_ref_tbl[] = {
     _property_int_ex(SongInfo, lyricNum, _ex_args_all),
     _property_array_object(SongInfo, lyric, lyric_ref_tbl, Lyric, lyricNum, 1),
     _property_int_ex(SongInfo, keyNum, _ex_args_all),
-    _property_array_int(SongInfo, key, int, keyNum, 1),
+    _property_array_int8(SongInfo, key, char, keyNum, 1),
     _property_int_ex(SongInfo, strNum, _ex_args_all),
     _property_array_string(SongInfo, strList, char*, strNum, 1),
     _property_end()
@@ -175,7 +175,7 @@ reflect_item_t play_list_ref_tbl[] = {
 static void printPlayList(PlayList* list);
 static void freePlayList(PlayList* list);
 
-const static char* jStr = "{\"name\":\"jay zhou\",\"creater\":\"dahuaxia\",\"songList\":[{\"songName\":\"qilixiang\",\"signerName\":\"jay zhou\",\"albumName\":\"qilixiang\",\"url\":\"www.kugou.com\",\"duration\":20093999939292928292234.1,\"paid\":false,\"price\":6.66,\"lyric\":[{\"time\":1,\"text\":\"Sparrow outside the window\"},{\"time\":10,\"text\":\"Multi mouth on the pole\"}],\"key\":[1111,2222,3333]},{\"songName\":\"dongfengpo\",\"signerName\":\"jay zhou\",\"albumName\":\"dongfengpo\",\"url\":\"music.qq.com\",\"duration\":180.9,\"paid\":true,\"price\":0.88,\"lyric\":[{\"time\":10,\"text\":\"A sad parting, standing alone in the window\"},{\"time\":20,\"text\":\"I'm behind the door pretending you're not gone\"}],\"key\":[1234,5678,9876],\"strList\":[\"abcd\",\"efgh\",\"ijkl\"]}],\"extData\":{\"a\":999,\"b\":1}}";
+const static char* jStr = "{\"name\":\"jay zhou\",\"creater\":\"dahuaxia\",\"songList\":[{\"songName\":\"qilixiang\",\"signerName\":\"jay zhou\",\"albumName\":\"qilixiang\",\"url\":\"www.kugou.com\",\"duration\":20093999939292928292234.1,\"paid\":false,\"price\":6.66,\"lyric\":[{\"time\":1,\"text\":\"Sparrow outside the window\"},{\"time\":10,\"text\":\"Multi mouth on the pole\"}],\"key\":[1,2,3]},{\"songName\":\"dongfengpo\",\"signerName\":\"jay zhou\",\"albumName\":\"dongfengpo\",\"url\":\"music.qq.com\",\"duration\":180.9,\"paid\":true,\"price\":0.88,\"lyric\":[{\"time\":10,\"text\":\"A sad parting, standing alone in the window\"},{\"time\":20,\"text\":\"I'm behind the door pretending you're not gone\"}],\"key\":[4,5,6],\"strList\":[\"abcd\",\"efgh\",\"ijkl\"]}],\"extData\":{\"a\":999,\"b\":1}}";
 
 static void checkResult(PlayList* playList, char* jstrOutput);
 /*
@@ -213,7 +213,7 @@ void test1()
 
 void checkResult(PlayList* playList, char* jstrOutput)
 {
-    const char* encodeTest = "{\"name\":\"jay zhou\",\"creater\":\"dahuaxia\",\"songList\":[{\"songName\":\"qilixiang\",\"signerName\":\"jay zhou\",\"albumName\":\"qilixiang\",\"url\":\"www.kugou.com\",\"duration\":0,\"paid\":false,\"price\":6.66,\"lyric\":[{\"time\":1,\"text\":\"Sparrow outside the window\"},{\"time\":10,\"text\":\"Multi mouth on the pole\"}],\"key\":[1111,2222,3333]},{\"songName\":\"dongfengpo\",\"signerName\":\"jay zhou\",\"albumName\":\"dongfengpo\",\"url\":\"music.qq.com\",\"duration\":180,\"paid\":true,\"price\":0.88,\"lyric\":[{\"time\":10,\"text\":\"A sad parting, standing alone in the window\"},{\"time\":20,\"text\":\"I'm behind the door pretending you're not gone\"}],\"key\":[1234,5678,9876],\"strList\":[\"abcd\",\"efgh\",\"ijkl\"]}],\"extData\":{\"a\":999,\"b\":1}}";
+    const char* encodeTest = "{\"name\":\"jay zhou\",\"creater\":\"dahuaxia\",\"songList\":[{\"songName\":\"qilixiang\",\"signerName\":\"jay zhou\",\"albumName\":\"qilixiang\",\"url\":\"www.kugou.com\",\"duration\":0,\"paid\":false,\"price\":6.66,\"lyric\":[{\"time\":1,\"text\":\"Sparrow outside the window\"},{\"time\":10,\"text\":\"Multi mouth on the pole\"}],\"key\":[1,2,3]},{\"songName\":\"dongfengpo\",\"signerName\":\"jay zhou\",\"albumName\":\"dongfengpo\",\"url\":\"music.qq.com\",\"duration\":180,\"paid\":true,\"price\":0.88,\"lyric\":[{\"time\":10,\"text\":\"A sad parting, standing alone in the window\"},{\"time\":20,\"text\":\"I'm behind the door pretending you're not gone\"}],\"key\":[4,5,6],\"strList\":[\"abcd\",\"efgh\",\"ijkl\"]}],\"extData\":{\"a\":999,\"b\":1}}";
 
     /* assert test */
     CHECK_STRING(playList->name, "jay zhou");
@@ -232,9 +232,9 @@ void checkResult(PlayList* playList, char* jstrOutput)
     CHECK_NUMBER(playList->songList[0].lyric[1].time, 10);
     CHECK_STRING(playList->songList[0].lyric[1].text, "Multi mouth on the pole");
     CHECK_NUMBER(playList->songList[0].keyNum, 3);
-    CHECK_NUMBER(playList->songList[0].key[0], 1111);
-    CHECK_NUMBER(playList->songList[0].key[1], 2222);
-    CHECK_NUMBER(playList->songList[0].key[2], 3333);
+    CHECK_NUMBER(playList->songList[0].key[0], 1);
+    CHECK_NUMBER(playList->songList[0].key[1], 2);
+    CHECK_NUMBER(playList->songList[0].key[2], 3);
     CHECK_NUMBER(playList->songList[0].strNum, 0);
 
     CHECK_STRING(playList->songList[1].songName, "dongfengpo");
@@ -250,9 +250,9 @@ void checkResult(PlayList* playList, char* jstrOutput)
     CHECK_NUMBER(playList->songList[1].lyric[1].time, 20);
     CHECK_STRING(playList->songList[1].lyric[1].text, "I'm behind the door pretending you're not gone");
     CHECK_NUMBER(playList->songList[1].keyNum, 3);
-    CHECK_NUMBER(playList->songList[1].key[0], 1234);
-    CHECK_NUMBER(playList->songList[1].key[1], 5678);
-    CHECK_NUMBER(playList->songList[1].key[2], 9876);
+    CHECK_NUMBER(playList->songList[1].key[0], 4);
+    CHECK_NUMBER(playList->songList[1].key[1], 5);
+    CHECK_NUMBER(playList->songList[1].key[2], 6);
     CHECK_NUMBER(playList->songList[1].strNum, 3);
     CHECK_STRING(playList->songList[1].strList[0], "abcd");
     CHECK_STRING(playList->songList[1].strList[1], "efgh");

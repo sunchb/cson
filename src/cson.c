@@ -34,8 +34,23 @@ extern cson_interface csomImpl;
 #define cson_is_number(type) (type == CSON_REAL || type == CSON_INTEGER)
 #define cson_is_bool(type)    (type == CSON_TRUE || type == CSON_FALSE)
 
-const reflect_item_t integerReflectTbl[] = {
-    {"0Integer", 0, sizeof(int), CSON_INTEGER, NULL, 0, NULL, 1},
+const reflect_item_t integer8ReflectTbl[] = {
+    {"0Integer", 0, 1, CSON_INTEGER, NULL, 0, NULL, 1},
+    {}
+};
+
+const reflect_item_t integer16ReflectTbl[] = {
+    {"0Integer", 0, 2, CSON_INTEGER, NULL, 0, NULL, 1},
+    {}
+};
+
+const reflect_item_t integer32ReflectTbl[] = {
+    {"0Integer", 0, 4, CSON_INTEGER, NULL, 0, NULL, 1},
+    {}
+};
+
+const reflect_item_t integer64ReflectTbl[] = {
+    {"0Integer", 0, 8, CSON_INTEGER, NULL, 0, NULL, 1},
     {}
 };
 
@@ -686,7 +701,11 @@ static void* printPropertySub(void* pData, const reflect_item_t* tbl)
 {
     if (tbl->type == CSON_ARRAY || tbl->type == CSON_OBJECT) return NULL;
 
-    if (tbl->type == CSON_INTEGER || tbl->type == CSON_TRUE || tbl->type == CSON_FALSE) printf("%s:%d\n", tbl->field, *(int*)pData);
+    if (tbl->type == CSON_TRUE) printf("%s:True\n", tbl->field);
+
+    if (tbl->type == CSON_FALSE) printf("%s:False\n", tbl->field);
+
+    if (tbl->type == CSON_INTEGER) printf("%s:%lld\n", tbl->field, getIntegerValueFromPointer(pData, tbl->size));
 
     if (tbl->type == CSON_REAL) printf("%s:%f\n", tbl->field, *(double*)pData);
 

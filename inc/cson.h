@@ -101,7 +101,10 @@ typedef struct reflect_item_t {
     int                     exArgs;                 /**< paser return failure when the field is not found and nullable equals to 0 */
 } reflect_item_t;
 
-extern const reflect_item_t integerReflectTbl[];
+extern const reflect_item_t integer8ReflectTbl[];
+extern const reflect_item_t integer16ReflectTbl[];
+extern const reflect_item_t integer32ReflectTbl[];
+extern const reflect_item_t integer64ReflectTbl[];
 extern const reflect_item_t stringReflectTbl[];
 extern const reflect_item_t boolReflectTbl[];
 extern const reflect_item_t realReflectTbl[];
@@ -117,52 +120,6 @@ extern const reflect_item_t realReflectTbl[];
 #define _property_end()                                                     {NULL, 0, 0, CSON_NULL, NULL, 0, NULL, 0, 1}
 
 /**
- * @brief Declaring integer properties.
- *
- * @param type: type of struct
- * @param field: field name of properties
- *
- */
-#define _property_int(type, field)                                          _property(type, field, CSON_INTEGER, integerReflectTbl, _ex_args_nullable)
-
-/**
- * @brief Declaring real properties.
- *
- * @param type: type of struct
- * @param field: field name of properties
- *
- */
-#define _property_real(type, field)                                         _property(type, field, CSON_REAL, realReflectTbl, _ex_args_nullable)
-
-/**
- * @brief Declaring bool properties.
- *
- * @param type: type of struct
- * @param field: field name of properties
- *
- */
-#define _property_bool(type, field)                                         _property(type, field, CSON_TRUE, boolReflectTbl, _ex_args_nullable)
-
-/**
- * @brief Declaring string properties.
- *
- * @param type: type of struct
- * @param field: field name of properties
- *
- */
-#define _property_string(type, field)                                       _property(type, field, CSON_STRING, stringReflectTbl, _ex_args_nullable)
-
-/**
- * @brief Declaring struct properties.
- *
- * @param type: type of struct
- * @param field: field name of properties
- * @param tbl: property description table of sub-struct
- *
- */
-#define _property_obj(type, field, tbl)                                     _property(type, field, CSON_OBJECT, tbl, _ex_args_nullable)
-
-/**
  * @brief Declaring array properties.
  *
  * @param type: type of struct
@@ -173,34 +130,31 @@ extern const reflect_item_t realReflectTbl[];
  * @param dimen: dimension of array
  *
  */
+#define _property_int(type, field)                                          _property(type, field, CSON_INTEGER, integer32ReflectTbl, _ex_args_nullable)
+#define _property_real(type, field)                                         _property(type, field, CSON_REAL, realReflectTbl, _ex_args_nullable)
+#define _property_bool(type, field)                                         _property(type, field, CSON_TRUE, boolReflectTbl, _ex_args_nullable)
+#define _property_string(type, field)                                       _property(type, field, CSON_STRING, stringReflectTbl, _ex_args_nullable)
+#define _property_obj(type, field, tbl)                                     _property(type, field, CSON_OBJECT, tbl, _ex_args_nullable)
+
 #define _property_array(type, field, tbl, subType, count, dimen)            {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, dimen, _ex_args_nullable}
-#define _property_array_object(type, field, tbl, subType, count, dimen)     _property_array(type, field, tbl, subType, count, dimen)
-#define _property_array_int(type, field, subType, count, dimen)             _property_array(type, field, integerReflectTbl, subType, count, dimen)
-#define _property_array_string(type, field, subType, count, dimen)          _property_array(type, field, stringReflectTbl, subType, count, dimen)
+#define _property_array_int8(type, field, subType, count, dimen)            _property_array(type, field, integer8ReflectTbl, subType, count, dimen)
+#define _property_array_int16(type, field, subType, count, dimen)           _property_array(type, field, integer16ReflectTbl, subType, count, dimen)
+#define _property_array_int32(type, field, subType, count, dimen)           _property_array(type, field, integer32ReflectTbl, subType, count, dimen)
+#define _property_array_int64(type, field, subType, count, dimen)           _property_array(type, field, integer64ReflectTbl, subType, count, dimen)
 #define _property_array_real(type, field, subType, count, dimen)            _property_array(type, field, realReflectTbl, subType, count, dimen)
 #define _property_array_bool(type, field, subType, count, dimen)            _property_array(type, field, boolReflectTbl, subType, count, dimen)
+#define _property_array_string(type, field, subType, count, dimen)          _property_array(type, field, stringReflectTbl, subType, count, dimen)
+#define _property_array_object(type, field, tbl, subType, count, dimen)     _property_array(type, field, tbl, subType, count, dimen)
 
 /**
- * @brief nonull definitions. parser will stop and return error code when field not found which declared whit it.
+ * @brief .
  *
- * @param refer to comment of nullable definition
- */
-// #define _property_int_nonull(type, field)                                   _property(type, field, CSON_INTEGER, NULL, 0)
-// #define _property_real_nonull(type, field)                                  _property(type, field, CSON_REAL, NULL, 0)
-// #define _property_bool_nonull(type, field)                                  _property(type, field, CSON_TRUE, NULL, 0)
-// #define _property_string_nonull(type, field)                                _property(type, field, CSON_STRING, NULL, 0)
-// #define _property_obj_nonull(type, field, tbl)                              _property(type, field, CSON_OBJECT, tbl, 0)
-// #define _property_array_nonull(type, field, tbl, subType, count, dimen)            {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, dimen, 0}
-// #define _property_array_object_nonull(type, field, tbl, subType, count, dimen)     _property_array_nonull(type, field, tbl, subType, count, dimen)
-// #define _property_array_int_nonull(type, field, subType, count, dimen)             _property_array_nonull(type, field, integerReflectTbl, subType, count, dimen)
-// #define _property_array_string_nonull(type, field, subType, count, dimen)          _property_array_nonull(type, field, stringReflectTbl, subType, count, dimen)
-// #define _property_array_real_nonull(type, field, subType, count, dimen)            _property_array_nonull(type, field, realReflectTbl, subType, count, dimen)
-// #define _property_array_bool_nonull(type, field, subType, count, dimen)            _property_array_nonull(type, field, boolReflectTbl, subType, count, dimen)
-
-/**
- * @brief nonull definitions. parser will stop and return error code when field not found which declared whit it.
- *
- * @param refer to comment of nullable definition
+ * @param type: type of struct
+ * @param field: field name of properties
+ * @param tbl: property description table of type of array
+ * @param subType: type of array
+ * @param count: property to save the array size
+ * @param dimen: dimension of array
  * @param args opptional with _ex_args_nullable(0x01) _ex_args_exclude_decode(0x02) _ex_args_exclude_encode(0x04)
  */
 #define _property_int_ex(type, field, args)                                 _property(type, field, CSON_INTEGER, NULL, args)
@@ -208,12 +162,16 @@ extern const reflect_item_t realReflectTbl[];
 #define _property_bool_ex(type, field, args)                                _property(type, field, CSON_TRUE, NULL, args)
 #define _property_string_ex(type, field, args)                              _property(type, field, CSON_STRING, NULL, args)
 #define _property_obj_ex(type, field, tbl, args)                            _property(type, field, CSON_OBJECT, tbl, args)
+
 #define _property_array_ex(type, field, tbl, subType, count, dimen, args)   {#field, _offset(type, field), _size(type, field), CSON_ARRAY, tbl, sizeof(subType), #count, dimen, args}
-#define _property_array_object_ex(type, field, tbl, subType, count, dimen, args)    _property_array_ex(type, field, tbl, subType, count, dimen)
-#define _property_array_int_ex(type, field, subType, count, dimen, args)    _property_array_ex(type, field, integerReflectTbl, subType, count, dimen)
-#define _property_array_string_ex(type, field, subType, count, dimen, args) _property_array_ex(type, field, stringReflectTbl, subType, count, dimen)
+#define _property_array_int8_ex(type, field, subType, count, dimen, args)   _property_array_ex(type, field, integer8ReflectTbl, subType, count, dimen)
+#define _property_array_int16_ex(type, field, subType, count, dimen, args)  _property_array_ex(type, field, integer16ReflectTbl, subType, count, dimen)
+#define _property_array_int32_ex(type, field, subType, count, dimen, args)  _property_array_ex(type, field, integer32ReflectTbl, subType, count, dimen)
+#define _property_array_int64_ex(type, field, subType, count, dimen, args)  _property_array_ex(type, field, integer64ReflectTbl, subType, count, dimen)
 #define _property_array_real_ex(type, field, subType, count, dimen, args)   _property_array_ex(type, field, realReflectTbl, subType, count, dimen)
 #define _property_array_bool_ex(type, field, subType, count, dimen, args)   _property_array_ex(type, field, boolReflectTbl, subType, count, dimen)
+#define _property_array_string_ex(type, field, subType, count, dimen, args) _property_array_ex(type, field, stringReflectTbl, subType, count, dimen)
+#define _property_array_object_ex(type, field, tbl, subType, count, dimen, args)    _property_array_ex(type, field, tbl, subType, count, dimen)
 
 /**
  * @brief function type of csonLoopProperty.
