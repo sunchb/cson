@@ -192,7 +192,7 @@ typedef void* (*loop_func_t)(void* pData, const reflect_item_t* tbl);
  *
  * @return void.
  */
-void    csonLoopProperty(void* obj, const reflect_item_t* tbl, loop_func_t func);
+void csonLoopProperty(void* obj, const reflect_item_t* tbl, loop_func_t func);
 
 /**
  * @brief convert json string to struct object.
@@ -237,30 +237,9 @@ void csonPrintProperty(void* pData, const reflect_item_t* tbl);
 void csonFreePointer(void* list, const reflect_item_t* tbl);
 
 /*
-    for Multidimensional array support
+   for Multidimensional array support
 */
 typedef size_t  cson_array_size_t;
-
-/**
- * @brief get array memory.
- *
- * @param count: count of array item
- * @param sizePerItem: bytes per array time
- *
- * @return void*.
- * @attention Array header information is implied, so don't use malloc directly.
- */
-void* csonArrayAlloc(cson_array_size_t count, cson_array_size_t sizePerItem);
-
-/**
- * @brief free array memory.
- *
- * @param ptr: array memory to be free.
- *
- * @return void.
- * @attention Array header information is implied, so don't use free directly.
- */
-void csonArrayFree(void* ptr);
 
 /**
  * @brief fast alloc multi-dimen array
@@ -277,6 +256,7 @@ void* csonAllocMultiDimenArray(int dimen, cson_array_size_t* sizePerDimen, size_
  * @brief the description of multidimensional array.
  */
 void csonFreeMultiDimenArray(void* p);
+
 typedef struct {
     cson_array_size_t       size;
     cson_array_size_t       cap;

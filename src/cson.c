@@ -175,6 +175,9 @@ static void* parseJsonMDArrayTail(cson_t jo_tmp, const reflect_item_t* tbl, int 
 static void csonLoopPropertyMDArraySub(void* pProperty, const reflect_item_t* tbl, int i, int dimen, loop_func_t func);
 static int invalidCountField(const reflect_item_t* tbl);
 
+static void csonArrayFree(void* ptr);
+static void* csonArrayAlloc(cson_array_size_t count, cson_array_size_t sizePerItem);
+
 int csonStruct2JsonStr(char** jstr, void* input, const reflect_item_t* tbl)
 {
     cson_t jsonPack = cson_object();
